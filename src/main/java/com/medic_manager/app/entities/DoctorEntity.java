@@ -1,9 +1,11 @@
 package com.medic_manager.app.entities;
 
+import com.medic_manager.app.enums.SpecializationEnum;
 import jakarta.persistence.*;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "doctor")
@@ -27,6 +29,9 @@ public class DoctorEntity {
     @Column(name = "surname", nullable = false)
     private String surname;
 
+    @ElementCollection(fetch = FetchType.LAZY)
+    @Column(name = "specialization", nullable = false)
+    @Enumerated(EnumType.STRING)
     private List<SpecializationEnum> specializationEnums;
 
     @Column(name = "imageUrl")

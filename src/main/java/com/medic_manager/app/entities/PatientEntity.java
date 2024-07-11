@@ -14,7 +14,6 @@ public class PatientEntity extends UserEntity {
     @Column(name = "birthdate", nullable = false)
     private LocalDate birthdate;
 
-    @ElementCollection(fetch = FetchType.LAZY)
     @Column(name = "gender", nullable = false)
     @Enumerated(EnumType.STRING)
     private GenderEnum genderEnum;

@@ -14,5 +14,16 @@ public abstract class UserEntity extends BaseEntity {
 
     @Column(name = "email", nullable = false)
     private String email;
-    
+
+    public String getName() {
+        return name;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public String getEmail() {
+        return email;
+    }
 }

@@ -18,4 +18,7 @@ public abstract class BaseEntity {
     @Column(name = "modified_at", nullable = false)
     private LocalDateTime modifiedAt;
 
+    public Long getId() {
+        return id;
+    }
 }

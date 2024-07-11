@@ -19,4 +19,12 @@ public class DoctorEntity extends UserEntity {
     @Column(name = "imageUrl")
     private String imageUrl;
 
+    public List<SpecializationEnum> getSpecializationEnums() {
+        return specializationEnums;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+    
 }

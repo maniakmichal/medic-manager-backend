@@ -19,4 +19,11 @@ public class PatientEntity extends UserEntity {
     @Enumerated(EnumType.STRING)
     private GenderEnum genderEnum;
 
+    public LocalDate getBirthdate() {
+        return birthdate;
+    }
+
+    public GenderEnum getGenderEnum() {
+        return genderEnum;
+    }
 }

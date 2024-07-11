@@ -1,4 +1,4 @@
-package src.main.java.com.medic_manager.app;
+package com.medic_manager.app;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

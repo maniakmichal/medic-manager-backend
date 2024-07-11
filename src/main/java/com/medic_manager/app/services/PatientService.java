@@ -21,7 +21,7 @@ public class PatientService {
         this.patientRepo = patientRepo;
     }
 
-    List<PatientEntity> getAllPatients() {
+    public List<PatientEntity> getAllPatients() {
         logger.info(LIST_ALL_PATIENTS);
         return patientRepo.findAll();
     }

@@ -7,7 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import java.util.List;
 
 @Entity
-@Table(name = "doctor")
+@Table(name = "doctor", uniqueConstraints = @UniqueConstraint(columnNames = "email"))
 @Validated
 public class DoctorEntity extends UserEntity {
 
@@ -26,5 +26,5 @@ public class DoctorEntity extends UserEntity {
     public String getImageUrl() {
         return imageUrl;
     }
-    
+
 }

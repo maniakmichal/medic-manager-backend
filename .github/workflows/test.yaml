@@ -19,7 +19,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '17'
-          distribution: 'adopt'
+          distribution: 'zulu'
 
       - name: Cache Maven dependencies
         uses: actions/cache@v3
@@ -30,4 +30,4 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Run tests with Maven
-        run: mvn clean test -X
+        run: mvn clean test

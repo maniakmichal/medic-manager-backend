@@ -30,4 +30,4 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Run tests with Maven
-        run: mvn clean test -e -X
+        run: mvn clean test -X

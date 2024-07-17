@@ -2,7 +2,7 @@ name: Run Tests
 
 on:
   workflow_run:
-    workflows: [ "Build and analyze" ]
+    workflows: [ "Build and verify with SonarCloud" ]
     types:
       - completed
 

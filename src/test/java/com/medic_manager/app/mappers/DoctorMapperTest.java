@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
+@SpringBootTest(classes = DoctorMapper.class)
 class DoctorMapperTest {
 
     @Autowired

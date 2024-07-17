@@ -1,5 +1,6 @@
 package com.medic_manager.app.mappers;
 
+import com.medic_manager.app.Application;
 import com.medic_manager.app.entities.DoctorEntity;
 import com.medic_manager.app.testdata.DoctorTestdata;
 import com.medic_manager.app.tos.DoctorTo;
@@ -9,7 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
+@SpringBootTest(classes = Application.class)
 class DoctorMapperTest {
 
     @Autowired

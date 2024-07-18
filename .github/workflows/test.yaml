@@ -23,9 +23,6 @@ jobs:
           - 3306:3306
         options: --health-cmd "mysqladmin ping --silent" --health-interval 10s --health-timeout 5s --health-retries 3
 
-      env:
-        SPRING_PROFILES_ACTIVE: ci
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -55,4 +52,6 @@ jobs:
         run: mvn clean install -B
 
       - name: Run tests with Maven
+        env:
+          SPRING_PROFILES_ACTIVE: ci
         run: mvn test -Dspring.profiles.active=$SPRING_PROFILES_ACTIVE

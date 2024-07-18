@@ -11,6 +11,21 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: testdb
+          MYSQL_USER: ciuser
+          MYSQL_PASSWORD: cipassword
+          MYSQL_ROOT_PASSWORD: rootpassword
+        ports:
+          - 3306:3306
+        options: --health-cmd "mysqladmin ping --silent" --health-interval 10s --health-timeout 5s --health-retries 3
+
+      env:
+        SPRING_PROFILES_ACTIVE: ci
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -29,5 +44,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
+      - name: Wait for MySQL
+        run: |
+          while ! mysqladmin ping -h"localhost" --silent; do
+            echo "Waiting for database connection..."
+            sleep 2
+          done
+
+      - name: Build with Maven
+        run: mvn clean install -B
+
       - name: Run tests with Maven
-        run: mvn clean test
+        run: mvn test -Dspring.profiles.active=$SPRING_PROFILES_ACTIVE

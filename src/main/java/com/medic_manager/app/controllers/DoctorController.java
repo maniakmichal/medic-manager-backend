@@ -4,10 +4,8 @@ import com.medic_manager.app.mappers.DoctorMapper;
 import com.medic_manager.app.services.DoctorService;
 import com.medic_manager.app.tos.DoctorTo;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -21,6 +19,12 @@ public class DoctorController {
     public DoctorController(final DoctorService service, final DoctorMapper mapper) {
         this.doctorService = service;
         this.doctorMapper = mapper;
+    }
+
+    @PostMapping("createDoctor")
+    @ResponseStatus(HttpStatus.CREATED)
+    public DoctorTo createDoctor(@RequestBody @Validated DoctorTo doctorTo) {
+        return doctorMapper.toDoctorTo(doctorService.createDoctor(doctorTo));
     }
 
     @GetMapping("doctors")

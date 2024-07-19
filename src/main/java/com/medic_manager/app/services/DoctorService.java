@@ -2,6 +2,7 @@ package com.medic_manager.app.services;
 
 import com.medic_manager.app.entities.DoctorEntity;
 import com.medic_manager.app.repositories.DoctorRepo;
+import com.medic_manager.app.tos.DoctorTo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,16 @@ public class DoctorService {
 
     public DoctorService(final DoctorRepo doctorRepo) {
         this.doctorRepo = doctorRepo;
+    }
+
+    public DoctorEntity createDoctor(DoctorTo doctorTo) {
+        DoctorEntity doctorEntity = new DoctorEntity();
+        doctorEntity.setName(doctorTo.name());
+        doctorEntity.setSurname(doctorTo.surname());
+        doctorEntity.setEmail(doctorTo.email());
+        doctorEntity.setSpecializationEnums(doctorTo.specializationEnums());
+        doctorEntity.setImageUrl(doctorTo.imageUrl());
+        return doctorRepo.save(doctorEntity);
     }
 
     public List<DoctorEntity> getAllDoctors() {

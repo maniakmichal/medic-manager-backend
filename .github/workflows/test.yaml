@@ -1,14 +1,27 @@
 name: Run Tests
 
 on:
-  workflow_run:
-    workflows: [ "Build and analyze" ]
-    types:
-      - completed
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [ opened, synchronize, reopened ]
 
 jobs:
   test:
     runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: testdb
+          MYSQL_USER: ciuser
+          MYSQL_PASSWORD: cipassword
+          MYSQL_ROOT_PASSWORD: rootpassword
+        ports:
+          - 3306:3306
+        options: --health-cmd "mysqladmin ping --silent" --health-interval 10s --health-timeout 5s --health-retries 3
 
     steps:
       - name: Checkout repository
@@ -23,10 +36,23 @@ jobs:
       - name: Cache Maven dependencies
         uses: actions/cache@v3
         with:
-          path: ~/.m2
+          path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
 
+      - name: Wait for MySQL
+        run: |
+          echo "Waiting for MySQL to be available..."
+          while ! mysqladmin ping -h"127.0.0.1" -u"ciuser" -p"cipassword" --silent; do
+            echo "Waiting for database connection..."
+            sleep 5
+          done
+
+      - name: Build with Maven
+        run: mvn clean install -B
+
       - name: Run tests with Maven
-        run: mvn test
+        env:
+          SPRING_PROFILES_ACTIVE: ci
+        run: mvn test -Dspring.profiles.active=$SPRING_PROFILES_ACTIVE

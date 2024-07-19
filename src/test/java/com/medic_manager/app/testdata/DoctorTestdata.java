@@ -2,9 +2,11 @@ package com.medic_manager.app.testdata;
 
 import com.medic_manager.app.entities.DoctorEntity;
 import com.medic_manager.app.enums.SpecializationEnum;
+import org.springframework.boot.test.context.TestComponent;
 
 import java.util.Arrays;
 
+@TestComponent
 public class DoctorTestdata {
 
     private static final String NAME = "Name";

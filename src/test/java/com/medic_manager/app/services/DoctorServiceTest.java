@@ -1,36 +1,25 @@
 package com.medic_manager.app.services;
 
+import com.medic_manager.app.UnitTestConfig;
 import com.medic_manager.app.entities.DoctorEntity;
 import com.medic_manager.app.repositories.DoctorRepo;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest
-@ExtendWith(MockitoExtension.class)
-@ActiveProfiles("test")
+@UnitTestConfig
 class DoctorServiceTest {
 
-    @MockBean
+    @Mock
     private DoctorRepo doctorRepo;
 
-    @Autowired
+    @InjectMocks
     private DoctorService doctorService;
-
-    @BeforeEach
-    void setup() {
-        doctorService = new DoctorService(doctorRepo);
-    }
 
     @Test
     void returnEmptyListWhenNoDoctorsFound() {

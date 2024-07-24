@@ -4,8 +4,11 @@ public class LoggerTextUtil {
     private static final String LIST_ALL_ENTITIES = "List all entities of %s.";
     private static final String CHECKING_IF_TO_INVALID = "Checking if TO invalid.";
     private static final String CREATE_NEW_ENTITY = "Creating new %s.";
-    private static final String ERROR_NULL_OR_INCORRECT_TO_PASSED_AS_ARGUMENT_TO_METHOD = "ERROR: null or incorrect TO passed as argument to method";
+    private static final String GET_ENTITY_BY_ID = "Getting entity of %s with ID: %d.";
+    private static final String ERROR_NULL_OR_INCORRECT_TO_PASSED_AS_ARGUMENT_TO_METHOD = "ERROR: null or incorrect TO passed as argument to method.";
+    private static final String ERROR_NULL_PASSED_AS_ARGUMENT_TO_METHOD = "ERROR: null passed as argument to method.";
     private static final String ERROR_ENTITY_WITH_PROPERTY_ALREADY_EXIST = "ERROR: Cannot create new %s with %s because it already exist.";
+    private static final String ERROR_ENTITY_WITH_ID_NOT_FOUND = "ERROR: entity of %s with ID: %d not found.";
 
     private LoggerTextUtil() {
     }
@@ -28,5 +31,17 @@ public class LoggerTextUtil {
 
     public static String getErrorEntityWithPropertyAlreadyExist(Class<?> name, String property) {
         return ERROR_ENTITY_WITH_PROPERTY_ALREADY_EXIST.formatted(name.getSimpleName(), property);
+    }
+
+    public static String getGetEntityById(Class<?> name, Long id) {
+        return GET_ENTITY_BY_ID.formatted(name.getSimpleName(), id);
+    }
+
+    public static String getErrorNullPassedAsArgumentToMethod() {
+        return ERROR_NULL_PASSED_AS_ARGUMENT_TO_METHOD;
+    }
+
+    public static String getErrorEntityWithIdNotFound(Class<?> name, Long id) {
+        return ERROR_ENTITY_WITH_ID_NOT_FOUND.formatted(name.getSimpleName(), id);
     }
 }

@@ -1,14 +1,16 @@
 package com.medic_manager.app.services;
 
-import com.medic_manager.app.common.LoggerTextUtil;
 import com.medic_manager.app.entities.DoctorEntity;
 import com.medic_manager.app.repositories.DoctorRepo;
 import com.medic_manager.app.tos.DoctorTo;
+import jakarta.persistence.EntityExistsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.logging.Logger;
+
+import static com.medic_manager.app.common.LoggerTextUtil.*;
 
 @Service
 @Transactional
@@ -23,13 +25,15 @@ public class DoctorService {
 
     public DoctorEntity createDoctor(DoctorTo doctorTo) {
         if (isToInvalid(doctorTo)) {
-            logger.info(LoggerTextUtil.ERROR_NULL_OR_INCORRECT_TO_PASSED_AS_ARGUMENT_TO_METHOD);
-            throw new IllegalArgumentException(LoggerTextUtil.ERROR_NULL_OR_INCORRECT_TO_PASSED_AS_ARGUMENT_TO_METHOD);
+            logger.info(getErrorNullOrIncorrectTOPassedAsArgumentToMethod());
+            throw new IllegalArgumentException(getErrorNullOrIncorrectTOPassedAsArgumentToMethod());
         }
         List<DoctorEntity> doctorsByEmails = doctorRepo.findByEmailIgnoreCase(doctorTo.email());
         if (!doctorsByEmails.isEmpty()) {
-            throw new IllegalArgumentException("HERE SHOULD BE SPECIFIC EXCEPTION.");
+            logger.info(getErrorEntityWithPropertyAlreadyExist(DoctorEntity.class, doctorTo.email()));
+            throw new EntityExistsException(getErrorEntityWithPropertyAlreadyExist(DoctorEntity.class, doctorTo.email()));
         } else {
+            logger.info(getCreateNewEntity(DoctorEntity.class));
             DoctorEntity doctorEntity = new DoctorEntity();
             doctorEntity.setName(doctorTo.name());
             doctorEntity.setSurname(doctorTo.surname());
@@ -41,12 +45,12 @@ public class DoctorService {
     }
 
     public List<DoctorEntity> getAllDoctors() {
-        logger.info(LoggerTextUtil.LIST_ALL_DOCTORS);
+        logger.info(getListAllEntities(DoctorEntity.class));
         return doctorRepo.findAll();
     }
 
     private boolean isToInvalid(DoctorTo doctorTo) {
-        logger.info(LoggerTextUtil.CHECKING_IF_TO_INVALID);
+        logger.info(getCheckingIfToInvalid());
         if (
                 doctorTo == null
                         || doctorTo.id() != null

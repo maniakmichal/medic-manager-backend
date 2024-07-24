@@ -25,24 +25,11 @@ public class DoctorService {
     }
 
     public DoctorEntity createDoctor(DoctorTo doctorTo) {
-        if (isToInvalid(doctorTo)) {
-            logger.info(getErrorNullOrIncorrectTOPassedAsArgumentToMethod());
-            throw new IllegalArgumentException(getErrorNullOrIncorrectTOPassedAsArgumentToMethod());
-        }
-        List<DoctorEntity> doctorsByEmails = doctorRepo.findByEmailIgnoreCase(doctorTo.email());
-        if (!doctorsByEmails.isEmpty()) {
-            logger.info(getErrorEntityWithPropertyAlreadyExist(DoctorEntity.class, doctorTo.email()));
-            throw new EntityExistsException(getErrorEntityWithPropertyAlreadyExist(DoctorEntity.class, doctorTo.email()));
-        } else {
-            logger.info(getCreateNewEntity(DoctorEntity.class));
-            DoctorEntity doctorEntity = new DoctorEntity();
-            doctorEntity.setName(doctorTo.name());
-            doctorEntity.setSurname(doctorTo.surname());
-            doctorEntity.setEmail(doctorTo.email());
-            doctorEntity.setSpecializationEnums(doctorTo.specializationEnums());
-            doctorEntity.setImageUrl(doctorTo.imageUrl());
-            return doctorRepo.save(doctorEntity);
-        }
+        validateCreateTo(doctorTo);
+        checkIfEntityAlreadyExist(doctorTo.email());
+        logger.info(getCreateNewEntity(DoctorEntity.class, doctorTo));
+        DoctorEntity doctorEntity = generateDoctor(doctorTo);
+        return doctorRepo.save(doctorEntity);
     }
 
     public List<DoctorEntity> getAllDoctors() {
@@ -66,11 +53,58 @@ public class DoctorService {
         }
     }
 
+    public DoctorEntity updateDoctor(DoctorTo doctorTo) {
+        validateUpdateTo(doctorTo);
+        checkIfEntityAlreadyExist(doctorTo.email());
+        logger.info(getUpdateEntity(DoctorEntity.class, doctorTo));
+        DoctorEntity doctorEntity = generateDoctor(doctorTo);
+        doctorEntity.setId(doctorTo.id());
+        return doctorRepo.save(doctorEntity);
+    }
+
+    public void deleteDoctor(Long id) {
+        DoctorEntity doctorEntity = getDoctorById(id);
+        logger.info("Deleting entity of %s with ID: %s.");
+        doctorRepo.delete(doctorEntity);
+        // TODO check how works the deleteById
+    }
+
+    private DoctorEntity generateDoctor(DoctorTo doctorTo) {
+        DoctorEntity doctorEntity = new DoctorEntity();
+        doctorEntity.setName(doctorTo.name());
+        doctorEntity.setSurname(doctorTo.surname());
+        doctorEntity.setEmail(doctorTo.email());
+        doctorEntity.setSpecializationEnums(doctorTo.specializationEnums());
+        doctorEntity.setImageUrl(doctorTo.imageUrl());
+        return doctorEntity;
+    }
+
+    private void checkIfEntityAlreadyExist(String email) throws EntityExistsException {
+        List<DoctorEntity> doctorsByEmails = doctorRepo.findByEmailIgnoreCase(email);
+        if (!doctorsByEmails.isEmpty()) {
+            logger.info(getErrorEntityWithPropertyAlreadyExist(DoctorEntity.class, email));
+            throw new EntityExistsException(getErrorEntityWithPropertyAlreadyExist(DoctorEntity.class, email));
+        }
+    }
+
+    private void validateCreateTo(DoctorTo doctorTo) throws IllegalArgumentException {
+        if (isToInvalid(doctorTo) || doctorTo.id() != null) {
+            logger.info(getErrorNullOrIncorrectTOPassedAsArgumentToMethod());
+            throw new IllegalArgumentException(getErrorNullOrIncorrectTOPassedAsArgumentToMethod());
+        }
+    }
+
+    private void validateUpdateTo(DoctorTo doctorTo) throws IllegalArgumentException {
+        if (isToInvalid(doctorTo) || doctorTo.id() == null) {
+            logger.info(getErrorNullOrIncorrectTOPassedAsArgumentToMethod());
+            throw new IllegalArgumentException(getErrorNullOrIncorrectTOPassedAsArgumentToMethod());
+        }
+    }
+
     private boolean isToInvalid(DoctorTo doctorTo) {
         logger.info(getCheckingIfToInvalid());
         if (
                 doctorTo == null
-                        || doctorTo.id() != null
                         || doctorTo.name() == null
                         || doctorTo.surname() == null
                         || doctorTo.email() == null

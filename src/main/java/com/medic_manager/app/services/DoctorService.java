@@ -4,6 +4,7 @@ import com.medic_manager.app.entities.DoctorEntity;
 import com.medic_manager.app.repositories.DoctorRepo;
 import com.medic_manager.app.tos.DoctorTo;
 import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +48,22 @@ public class DoctorService {
     public List<DoctorEntity> getAllDoctors() {
         logger.info(getListAllEntities(DoctorEntity.class));
         return doctorRepo.findAll();
+    }
+
+    public DoctorEntity getDoctorById(Long id) {
+        logger.info(getGetEntityById(DoctorEntity.class, id));
+        if (id == null) {
+            logger.info(getErrorNullPassedAsArgumentToMethod());
+            throw new IllegalArgumentException(getErrorNullPassedAsArgumentToMethod());
+        } else {
+            return doctorRepo.findById(id)
+                    .orElseThrow(
+                            () -> {
+                                logger.info(getErrorEntityWithIdNotFound(DoctorEntity.class, id));
+                                throw new EntityNotFoundException(getErrorEntityWithIdNotFound(DoctorEntity.class, id));
+                            }
+                    );
+        }
     }
 
     private boolean isToInvalid(DoctorTo doctorTo) {

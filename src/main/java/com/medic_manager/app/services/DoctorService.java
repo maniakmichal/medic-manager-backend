@@ -42,15 +42,14 @@ public class DoctorService {
         if (id == null) {
             logger.info(getErrorNullPassedAsArgumentToMethod());
             throw new IllegalArgumentException(getErrorNullPassedAsArgumentToMethod());
-        } else {
-            return doctorRepo.findById(id)
-                    .orElseThrow(
-                            () -> {
-                                logger.info(getErrorEntityWithIdNotFound(DoctorEntity.class, id));
-                                throw new EntityNotFoundException(getErrorEntityWithIdNotFound(DoctorEntity.class, id));
-                            }
-                    );
         }
+        return doctorRepo.findById(id)
+                .orElseThrow(
+                        () -> {
+                            logger.info(getErrorEntityWithIdNotFound(DoctorEntity.class, id));
+                            throw new EntityNotFoundException(getErrorEntityWithIdNotFound(DoctorEntity.class, id));
+                        }
+                );
     }
 
     public DoctorEntity updateDoctor(DoctorTo doctorTo) {
@@ -63,10 +62,12 @@ public class DoctorService {
     }
 
     public void deleteDoctor(Long id) {
-        DoctorEntity doctorEntity = getDoctorById(id);
-        logger.info("Deleting entity of %s with ID: %s.");
-        doctorRepo.delete(doctorEntity);
-        // TODO check how works the deleteById
+        if (id == null) {
+            logger.info(getErrorNullPassedAsArgumentToMethod());
+            throw new IllegalArgumentException(getErrorNullPassedAsArgumentToMethod());
+        }
+        logger.info(getDeleteEntityById(DoctorEntity.class, id));
+        doctorRepo.deleteById(id);
     }
 
     private DoctorEntity generateDoctor(DoctorTo doctorTo) {
@@ -108,6 +109,7 @@ public class DoctorService {
                         || doctorTo.name() == null
                         || doctorTo.surname() == null
                         || doctorTo.email() == null
+                        || doctorTo.specializationEnums() == null
         ) {
             return true;
         } else {

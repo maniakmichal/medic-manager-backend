@@ -1,11 +1,13 @@
 package com.medic_manager.app.common;
 
 public class LoggerTextUtil {
+    //TODO check the logger issue in the service
     private static final String LIST_ALL_ENTITIES = "List all entities of %s.";
     private static final String CHECKING_IF_TO_INVALID = "Checking if TO invalid.";
     private static final String CREATE_NEW_ENTITY = "Creating new %s with values %s.";
     private static final String UPDATE_ENTITY = "Updating %s with values %s.";
     private static final String GET_ENTITY_BY_ID = "Getting entity of %s with ID: %d.";
+    private static final String DELETE_ENTITY_BY_ID = "Deleting entity of %s with ID: %d.";
     private static final String ERROR_NULL_OR_INCORRECT_TO_PASSED_AS_ARGUMENT_TO_METHOD = "ERROR: null or incorrect TO passed as argument to method.";
     private static final String ERROR_NULL_PASSED_AS_ARGUMENT_TO_METHOD = "ERROR: null passed as argument to method.";
     private static final String ERROR_ENTITY_WITH_PROPERTY_ALREADY_EXIST = "ERROR: Cannot create new/update %s with %s because it already exist.";
@@ -40,6 +42,10 @@ public class LoggerTextUtil {
 
     public static String getGetEntityById(Class<?> name, Long id) {
         return GET_ENTITY_BY_ID.formatted(name.getSimpleName(), id);
+    }
+
+    public static String getDeleteEntityById(Class<?> name, Long id) {
+        return DELETE_ENTITY_BY_ID.formatted(name.getSimpleName(), id);
     }
 
     public static String getErrorNullPassedAsArgumentToMethod() {

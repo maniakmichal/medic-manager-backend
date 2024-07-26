@@ -6,7 +6,7 @@ import com.medic_manager.app.tos.DoctorTo;
 import org.junit.jupiter.params.provider.Arguments;
 import org.springframework.boot.test.context.TestComponent;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 
 @TestComponent
@@ -35,22 +35,49 @@ public class DoctorTestdata {
                 NAME,
                 SURNAME,
                 email,
-                Arrays.asList(SpecializationEnum.values()),
+                List.of(SpecializationEnum.values()),
                 IMAGE_URL
         );
     }
 
-    public static Stream<Arguments> provideInvalidDoctorToList() {
+    public static DoctorTo mockUpdateDoctorTo(Long id, String email) {
+        return new DoctorTo(
+                id,
+                NAME,
+                SURNAME,
+                email,
+                List.of(SpecializationEnum.values()),
+                IMAGE_URL
+        );
+    }
+
+    public static Stream<Arguments> provideInvalidCreateDoctorToList() {
         return Stream.of(
-                Arguments.of(new DoctorTo(null, null, SURNAME, EMAIL, Arrays.asList(SpecializationEnum.values()), IMAGE_URL)),
-                Arguments.of(new DoctorTo(null, "", SURNAME, EMAIL, Arrays.asList(SpecializationEnum.values()), IMAGE_URL)),
-                Arguments.of(new DoctorTo(null, NAME, null, EMAIL, Arrays.asList(SpecializationEnum.values()), IMAGE_URL)),
-                Arguments.of(new DoctorTo(null, NAME, "", EMAIL, Arrays.asList(SpecializationEnum.values()), IMAGE_URL)),
-                Arguments.of(new DoctorTo(null, NAME, SURNAME, null, Arrays.asList(SpecializationEnum.values()), IMAGE_URL)),
-                Arguments.of(new DoctorTo(null, NAME, SURNAME, "", Arrays.asList(SpecializationEnum.values()), IMAGE_URL)),
+                null,
+                Arguments.of(new DoctorTo(null, null, SURNAME, EMAIL, List.of(SpecializationEnum.values()), IMAGE_URL)),
+                Arguments.of(new DoctorTo(null, "", SURNAME, EMAIL, List.of(SpecializationEnum.values()), IMAGE_URL)),
+                Arguments.of(new DoctorTo(null, NAME, null, EMAIL, List.of(SpecializationEnum.values()), IMAGE_URL)),
+                Arguments.of(new DoctorTo(null, NAME, "", EMAIL, List.of(SpecializationEnum.values()), IMAGE_URL)),
+                Arguments.of(new DoctorTo(null, NAME, SURNAME, null, List.of(SpecializationEnum.values()), IMAGE_URL)),
+                Arguments.of(new DoctorTo(null, NAME, SURNAME, "", List.of(SpecializationEnum.values()), IMAGE_URL)),
                 Arguments.of(new DoctorTo(null, NAME, SURNAME, EMAIL, null, IMAGE_URL)),
-                Arguments.of(new DoctorTo(null, NAME, SURNAME, EMAIL, Arrays.asList(), IMAGE_URL)),
-                Arguments.of(new DoctorTo(1L, NAME, SURNAME, EMAIL, Arrays.asList(SpecializationEnum.values()), IMAGE_URL))
+                Arguments.of(new DoctorTo(null, NAME, SURNAME, EMAIL, List.of(), IMAGE_URL)),
+                Arguments.of(new DoctorTo(1L, NAME, SURNAME, EMAIL, List.of(SpecializationEnum.values()), IMAGE_URL))
+        );
+    }
+
+    public static Stream<Arguments> provideInvalidUpdateDoctorToList() {
+        return Stream.of(
+                null,
+                Arguments.of(new DoctorTo(1L, null, SURNAME, EMAIL, List.of(SpecializationEnum.values()), IMAGE_URL)),
+                Arguments.of(new DoctorTo(1L, "", SURNAME, EMAIL, List.of(SpecializationEnum.values()), IMAGE_URL)),
+                Arguments.of(new DoctorTo(1L, NAME, null, EMAIL, List.of(SpecializationEnum.values()), IMAGE_URL)),
+                Arguments.of(new DoctorTo(1L, NAME, "", EMAIL, List.of(SpecializationEnum.values()), IMAGE_URL)),
+                Arguments.of(new DoctorTo(1L, NAME, SURNAME, null, List.of(SpecializationEnum.values()), IMAGE_URL)),
+                Arguments.of(new DoctorTo(1L, NAME, SURNAME, "", List.of(SpecializationEnum.values()), IMAGE_URL)),
+                Arguments.of(new DoctorTo(1L, NAME, SURNAME, EMAIL, null, IMAGE_URL)),
+                Arguments.of(new DoctorTo(1L, NAME, SURNAME, EMAIL, List.of(), IMAGE_URL)),
+                Arguments.of(new DoctorTo(null, NAME, SURNAME, EMAIL, List.of(SpecializationEnum.values()), IMAGE_URL))
         );
     }
 
@@ -58,7 +85,7 @@ public class DoctorTestdata {
         DoctorEntity doctorEntity = new DoctorEntity();
         doctorEntity.setName(NAME);
         doctorEntity.setSurname(SURNAME);
-        doctorEntity.setSpecializationEnums(Arrays.asList(SpecializationEnum.values()));
+        doctorEntity.setSpecializationEnums(List.of(SpecializationEnum.values()));
         doctorEntity.setImageUrl(IMAGE_URL);
         return doctorEntity;
     }

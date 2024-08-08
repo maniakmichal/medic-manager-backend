@@ -1,6 +1,8 @@
 package com.medic_manager.app.services;
 
+import com.medic_manager.app.common.LoggerTextUtil;
 import com.medic_manager.app.entities.DoctorEntity;
+import com.medic_manager.app.enums.SpecializationEnum;
 import com.medic_manager.app.repositories.DoctorRepo;
 import com.medic_manager.app.tos.DoctorTo;
 import jakarta.persistence.EntityExistsException;
@@ -27,27 +29,27 @@ public class DoctorService {
     public DoctorEntity createDoctor(DoctorTo doctorTo) {
         validateCreateTo(doctorTo);
         checkIfEntityAlreadyExist(doctorTo.email());
-        logger.info(getCreateNewEntity(DoctorEntity.class, doctorTo));
+        logger.info(() -> getCreateNewEntity(DoctorEntity.class, doctorTo));
         DoctorEntity doctorEntity = generateDoctor(doctorTo);
         return doctorRepo.save(doctorEntity);
     }
 
     public List<DoctorEntity> getAllDoctors() {
-        logger.info(getListAllEntities(DoctorEntity.class));
+        logger.info(() -> getListAllEntities(DoctorEntity.class));
         return doctorRepo.findAll();
     }
 
     public DoctorEntity getDoctorById(Long id) {
-        logger.info(getGetEntityById(DoctorEntity.class, id));
+        logger.info(() -> getGetEntityById(DoctorEntity.class, id));
         if (id == null) {
-            logger.info(getErrorNullPassedAsArgumentToMethod());
+            logger.severe(LoggerTextUtil::getErrorNullPassedAsArgumentToMethod);
             throw new IllegalArgumentException(getErrorNullPassedAsArgumentToMethod());
         }
         return doctorRepo.findById(id)
                 .orElseThrow(
                         () -> {
-                            logger.info(getErrorEntityWithIdNotFound(DoctorEntity.class, id));
-                            throw new EntityNotFoundException(getErrorEntityWithIdNotFound(DoctorEntity.class, id));
+                            logger.severe(getErrorEntityWithIdNotFound(DoctorEntity.class, id));
+                            return new EntityNotFoundException(getErrorEntityWithIdNotFound(DoctorEntity.class, id));
                         }
                 );
     }
@@ -55,7 +57,7 @@ public class DoctorService {
     public DoctorEntity updateDoctor(DoctorTo doctorTo) {
         validateUpdateTo(doctorTo);
         checkIfEntityAlreadyExist(doctorTo.email());
-        logger.info(getUpdateEntity(DoctorEntity.class, doctorTo));
+        logger.info(() -> getUpdateEntity(DoctorEntity.class, doctorTo));
         DoctorEntity doctorEntity = generateDoctor(doctorTo);
         doctorEntity.setId(doctorTo.id());
         return doctorRepo.save(doctorEntity);
@@ -63,10 +65,10 @@ public class DoctorService {
 
     public void deleteDoctor(Long id) {
         if (id == null) {
-            logger.info(getErrorNullPassedAsArgumentToMethod());
+            logger.severe(getErrorNullPassedAsArgumentToMethod());
             throw new IllegalArgumentException(getErrorNullPassedAsArgumentToMethod());
         }
-        logger.info(getDeleteEntityById(DoctorEntity.class, id));
+        logger.info(() -> getDeleteEntityById(DoctorEntity.class, id));
         doctorRepo.deleteById(id);
     }
 
@@ -83,33 +85,33 @@ public class DoctorService {
     private void checkIfEntityAlreadyExist(String email) throws EntityExistsException {
         List<DoctorEntity> doctorsByEmails = doctorRepo.findByEmailIgnoreCase(email);
         if (!doctorsByEmails.isEmpty()) {
-            logger.info(getErrorEntityWithPropertyAlreadyExist(DoctorEntity.class, email));
+            logger.severe(() -> getErrorEntityWithPropertyAlreadyExist(DoctorEntity.class, email));
             throw new EntityExistsException(getErrorEntityWithPropertyAlreadyExist(DoctorEntity.class, email));
         }
     }
 
     private void validateCreateTo(DoctorTo doctorTo) throws IllegalArgumentException {
         if (isToInvalid(doctorTo) || doctorTo.id() != null) {
-            logger.info(getErrorNullOrIncorrectTOPassedAsArgumentToMethod());
+            logger.severe(getErrorNullOrIncorrectTOPassedAsArgumentToMethod());
             throw new IllegalArgumentException(getErrorNullOrIncorrectTOPassedAsArgumentToMethod());
         }
     }
 
     private void validateUpdateTo(DoctorTo doctorTo) throws IllegalArgumentException {
         if (isToInvalid(doctorTo) || doctorTo.id() == null) {
-            logger.info(getErrorNullOrIncorrectTOPassedAsArgumentToMethod());
+            logger.severe(getErrorNullOrIncorrectTOPassedAsArgumentToMethod());
             throw new IllegalArgumentException(getErrorNullOrIncorrectTOPassedAsArgumentToMethod());
         }
     }
 
     private boolean isToInvalid(DoctorTo doctorTo) {
-        logger.info(getCheckingIfToInvalid());
+        logger.info(LoggerTextUtil::getCheckingIfToInvalid);
         if (
                 doctorTo == null
                         || doctorTo.name() == null
                         || doctorTo.surname() == null
                         || doctorTo.email() == null
-                        || doctorTo.specializationEnums() == null
+                        || isListOfEnumsNull(doctorTo.specializationEnums())
         ) {
             return true;
         } else {
@@ -118,5 +120,9 @@ public class DoctorService {
                     || doctorTo.email().isEmpty()
                     || doctorTo.specializationEnums().isEmpty();
         }
+    }
+
+    private boolean isListOfEnumsNull(List<SpecializationEnum> list) {
+        return list == null;
     }
 }

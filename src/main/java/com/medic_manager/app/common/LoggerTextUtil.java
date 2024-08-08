@@ -1,7 +1,6 @@
 package com.medic_manager.app.common;
 
 public class LoggerTextUtil {
-    //TODO check the logger issue in the service
     private static final String LIST_ALL_ENTITIES = "List all entities of %s.";
     private static final String CHECKING_IF_TO_INVALID = "Checking if TO invalid.";
     private static final String CREATE_NEW_ENTITY = "Creating new %s with values %s.";

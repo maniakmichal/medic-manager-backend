@@ -18,6 +18,18 @@ public abstract class BaseEntity {
     @Column(name = "modified_at", nullable = false)
     private LocalDateTime modifiedAt;
 
+    @PrePersist
+    private void onCreate() {
+        LocalDateTime actualDateTime = LocalDateTime.now();
+        createdAt = actualDateTime;
+        modifiedAt = actualDateTime;
+    }
+
+    @PreUpdate
+    private void onUpdate() {
+        modifiedAt = LocalDateTime.now();
+    }
+
     public Long getId() {
         return id;
     }

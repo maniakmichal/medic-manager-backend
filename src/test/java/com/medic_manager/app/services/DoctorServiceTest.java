@@ -135,8 +135,10 @@ class DoctorServiceTest {
     void updateDoctor() {
         //given
         DoctorTo doctorTo = mockUpdateDoctorTo(ID, EMAIL_1);
+        DoctorEntity doctorEntity = mockDoctorEntityWithIdAndEmail(ID, EMAIL_2);
         //when
         when(doctorRepo.findByEmailIgnoreCase(EMAIL_1)).thenReturn(List.of());
+        when(doctorRepo.findById(ID)).thenReturn(Optional.of(doctorEntity));
         doctorService.updateDoctor(doctorTo);
         verify(doctorRepo).save(captor.capture());
         DoctorEntity capturedEntity = captor.getValue();

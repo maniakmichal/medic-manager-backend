@@ -57,9 +57,13 @@ public class DoctorService {
     public DoctorEntity updateDoctor(DoctorTo doctorTo) {
         validateUpdateTo(doctorTo);
         checkIfEntityAlreadyExist(doctorTo.email());
+        DoctorEntity persistedDoctor = doctorRepo.findById(doctorTo.id())
+                .orElseThrow(() -> {
+                    logger.severe(getErrorEntityWithIdNotFound(DoctorEntity.class, doctorTo.id()));
+                    return new EntityNotFoundException(getErrorEntityWithIdNotFound(DoctorEntity.class, doctorTo.id()));
+                });
         logger.info(() -> getUpdateEntity(DoctorEntity.class, doctorTo));
-        DoctorEntity doctorEntity = generateDoctor(doctorTo);
-        doctorEntity.setId(doctorTo.id());
+        DoctorEntity doctorEntity = updateDoctorEntity(persistedDoctor, doctorTo);
         return doctorRepo.save(doctorEntity);
     }
 
@@ -80,6 +84,15 @@ public class DoctorService {
         doctorEntity.setSpecializationEnums(doctorTo.specializationEnums());
         doctorEntity.setImageUrl(doctorTo.imageUrl());
         return doctorEntity;
+    }
+
+    private DoctorEntity updateDoctorEntity(DoctorEntity persistedDoctor, DoctorTo doctorTo) {
+        persistedDoctor.setName(doctorTo.name());
+        persistedDoctor.setSurname(doctorTo.surname());
+        persistedDoctor.setEmail(doctorTo.email());
+        persistedDoctor.setSpecializationEnums(doctorTo.specializationEnums());
+        persistedDoctor.setImageUrl(doctorTo.imageUrl());
+        return persistedDoctor;
     }
 
     private void checkIfEntityAlreadyExist(String email) throws EntityExistsException {

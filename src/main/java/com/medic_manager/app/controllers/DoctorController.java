@@ -35,4 +35,16 @@ public class DoctorController {
                 .map(doctorMapper::toDoctorTo)
                 .toList();
     }
+
+    @GetMapping("doctor/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public DoctorTo getDoctorById(@PathVariable Long id) {
+        return doctorMapper.toDoctorTo(doctorService.getDoctorById(id));
+    }
+
+    @PutMapping("updateDoctor")
+    @ResponseStatus(HttpStatus.OK)
+    public DoctorTo updateDoctor(@RequestBody @Validated DoctorTo doctorTo) {
+        return doctorMapper.toDoctorTo(doctorService.updateDoctor(doctorTo));
+    }
 }

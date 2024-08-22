@@ -113,7 +113,7 @@ class DoctorControllerTest {
                     GET_ALL_URL,
                     HttpMethod.GET,
                     null,
-                    new ParameterizedTypeReference<List<DoctorTo>>() {
+                    new ParameterizedTypeReference<>() {
                     }
             );
             //then
@@ -133,7 +133,7 @@ class DoctorControllerTest {
                     GET_ALL_URL,
                     HttpMethod.GET,
                     null,
-                    new ParameterizedTypeReference<List<DoctorTo>>() {
+                    new ParameterizedTypeReference<>() {
                     }
             );
             //then

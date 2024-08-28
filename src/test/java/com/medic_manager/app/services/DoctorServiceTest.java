@@ -38,7 +38,7 @@ class DoctorServiceTest {
         //given
         DoctorTo doctorTo = mockCreateDoctorTo(EMAIL_1);
         //when
-        when(doctorRepo.findByEmailIgnoreCase(EMAIL_1)).thenReturn(List.of());
+        when(doctorRepo.findByEmailIgnoreCase(EMAIL_1)).thenReturn(Optional.empty());
         doctorService.createDoctor(doctorTo);
         verify(doctorRepo).save(captor.capture());
         DoctorEntity capturedEntity = captor.getValue();
@@ -67,7 +67,7 @@ class DoctorServiceTest {
         DoctorEntity doctorEntity = mockDoctorEntityWithEmail(EMAIL_1);
         DoctorTo doctorTo = mockCreateDoctorTo(EMAIL_1);
         //when
-        when(doctorRepo.findByEmailIgnoreCase(EMAIL_1)).thenReturn(List.of(doctorEntity));
+        when(doctorRepo.findByEmailIgnoreCase(EMAIL_1)).thenReturn(Optional.of(doctorEntity));
         //then
         assertThatThrownBy(
                 () -> doctorService.createDoctor(doctorTo)
@@ -137,7 +137,7 @@ class DoctorServiceTest {
         DoctorTo doctorTo = mockUpdateDoctorTo(ID, EMAIL_1);
         DoctorEntity doctorEntity = mockDoctorEntityWithIdAndEmail(ID, EMAIL_2);
         //when
-        when(doctorRepo.findByEmailIgnoreCase(EMAIL_1)).thenReturn(List.of());
+        when(doctorRepo.findByEmailIgnoreCase(EMAIL_1)).thenReturn(Optional.empty());
         when(doctorRepo.findById(ID)).thenReturn(Optional.of(doctorEntity));
         doctorService.updateDoctor(doctorTo);
         verify(doctorRepo).save(captor.capture());
@@ -168,7 +168,7 @@ class DoctorServiceTest {
         DoctorEntity doctorEntity = mockDoctorEntityWithIdAndEmail(ID, EMAIL_1);
         DoctorTo doctorTo = mockUpdateDoctorTo(ID, EMAIL_1);
         //when
-        when(doctorRepo.findByEmailIgnoreCase(EMAIL_1)).thenReturn(List.of(doctorEntity));
+        when(doctorRepo.findByEmailIgnoreCase(EMAIL_1)).thenReturn(Optional.of(doctorEntity));
         //then
         assertThatThrownBy(
                 () -> doctorService.updateDoctor(doctorTo)

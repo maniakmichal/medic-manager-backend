@@ -22,7 +22,15 @@ public class PatientEntity extends UserEntity {
         return birthdate;
     }
 
+    public void setBirthdate(LocalDate birthdate) {
+        this.birthdate = birthdate;
+    }
+
     public GenderEnum getGenderEnum() {
         return genderEnum;
+    }
+
+    public void setGenderEnum(GenderEnum genderEnum) {
+        this.genderEnum = genderEnum;
     }
 }

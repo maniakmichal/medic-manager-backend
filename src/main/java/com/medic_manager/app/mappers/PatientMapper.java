@@ -9,6 +9,7 @@ public class PatientMapper {
 
     public PatientTo toPatientTo(PatientEntity entity) {
         return new PatientTo(
+                entity.getId(),
                 entity.getName(),
                 entity.getSurname(),
                 entity.getEmail(),

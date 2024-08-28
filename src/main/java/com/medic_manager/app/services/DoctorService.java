@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import static com.medic_manager.app.common.LoggerTextUtil.*;
@@ -96,8 +97,8 @@ public class DoctorService {
     }
 
     private void checkIfEntityAlreadyExist(String email) throws EntityExistsException {
-        List<DoctorEntity> doctorsByEmails = doctorRepo.findByEmailIgnoreCase(email);
-        if (!doctorsByEmails.isEmpty()) {
+        Optional<DoctorEntity> doctorByEmail = doctorRepo.findByEmailIgnoreCase(email);
+        if (doctorByEmail.isPresent()) {
             logger.severe(() -> getErrorEntityWithPropertyAlreadyExist(DoctorEntity.class, email));
             throw new EntityExistsException(getErrorEntityWithPropertyAlreadyExist(DoctorEntity.class, email));
         }

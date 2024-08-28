@@ -17,6 +17,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.medic_manager.app.testdata.DoctorTestdata.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,10 +25,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 @IntegrationTestConfig
 class DoctorControllerTest {
 
-    private static final String CREATE_URL = "/com/medic-manager/app/createDoctor";
+    private static final String CREATE_URL = "/com/medic-manager/app/create-doctor";
     private static final String GET_ALL_URL = "/com/medic-manager/app/doctors";
     private static final String GET_BY_ID_URL = "/com/medic-manager/app/doctor/";
-    private static final String UPDATE_URL = "/com/medic-manager/app/updateDoctor";
+    private static final String UPDATE_URL = "/com/medic-manager/app/update-doctor";
+    private static final String DELETE_URL = "/com/medic-manager/app/delete-doctor/";
     private static final String EMAIL_1 = "email1@example.com";
     private static final String EMAIL_2 = "email2@example.com";
     @Autowired
@@ -272,6 +274,63 @@ class DoctorControllerTest {
             List<DoctorEntity> doctors = doctorRepo.findAll();
             assertThat(doctors).hasSize(1);
             assertThat(doctors.get(0).getEmail()).isEqualTo(EMAIL_1);
+        }
+    }
+
+    @Nested
+    class deletesDoctor {
+        @Test
+        void deleteDoctor() {
+            //given
+            DoctorEntity doctor1 = mockDoctorEntityWithEmail(EMAIL_1);
+            DoctorEntity doctor2 = mockDoctorEntityWithEmail(EMAIL_2);
+            DoctorEntity savedDoctor1 = doctorRepo.save(doctor1);
+            DoctorEntity savedDoctor2 = doctorRepo.save(doctor2);
+            //when
+            ResponseEntity<Void> response = restTemplate.exchange(
+                    DELETE_URL + savedDoctor2.getId(),
+                    HttpMethod.DELETE,
+                    null,
+                    Void.class
+            );
+            //then
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+            Optional<DoctorEntity> deletedDoctor = doctorRepo.findById(savedDoctor2.getId());
+            assertThat(deletedDoctor).isNotPresent();
+            Optional<DoctorEntity> leftDoctor = doctorRepo.findById(savedDoctor1.getId());
+            assertThat(leftDoctor).isPresent();
+        }
+
+        @Test
+        void returnBadRequestWhenDeleteDoctorByNullId() {
+            //given
+            //when
+            ResponseEntity<ErrorResponseUtil> response = restTemplate.exchange(
+                    DELETE_URL + null,
+                    HttpMethod.DELETE,
+                    null,
+                    ErrorResponseUtil.class
+            );
+            //then
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        }
+
+        @Test
+        void returnNoContentWhenDeleteDoctorByNotExistingId() {
+            //given
+            DoctorEntity doctor = mockDoctorEntityWithEmail(EMAIL_1);
+            DoctorEntity savedDoctor = doctorRepo.save(doctor);
+            //when
+            ResponseEntity<Void> response = restTemplate.exchange(
+                    DELETE_URL + Long.MAX_VALUE,
+                    HttpMethod.DELETE,
+                    null,
+                    Void.class
+            );
+            //then
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+            Optional<DoctorEntity> notDeletedDoctor = doctorRepo.findById(savedDoctor.getId());
+            assertThat(notDeletedDoctor).isPresent();
         }
     }
 }

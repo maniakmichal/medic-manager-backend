@@ -21,7 +21,7 @@ public class DoctorController {
         this.doctorMapper = mapper;
     }
 
-    @PostMapping("createDoctor")
+    @PostMapping("create-doctor")
     @ResponseStatus(HttpStatus.CREATED)
     public DoctorTo createDoctor(@RequestBody @Validated DoctorTo doctorTo) {
         return doctorMapper.toDoctorTo(doctorService.createDoctor(doctorTo));
@@ -42,9 +42,15 @@ public class DoctorController {
         return doctorMapper.toDoctorTo(doctorService.getDoctorById(id));
     }
 
-    @PutMapping("updateDoctor")
+    @PutMapping("update-doctor")
     @ResponseStatus(HttpStatus.OK)
     public DoctorTo updateDoctor(@RequestBody @Validated DoctorTo doctorTo) {
         return doctorMapper.toDoctorTo(doctorService.updateDoctor(doctorTo));
+    }
+
+    @DeleteMapping("delete-doctor/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteDoctor(@PathVariable Long id) {
+        doctorService.deleteDoctor(id);
     }
 }

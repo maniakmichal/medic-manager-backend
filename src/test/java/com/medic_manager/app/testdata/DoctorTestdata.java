@@ -17,30 +17,26 @@ public class DoctorTestdata {
     private static final String IMAGE_URL = "";
     private static final String EMAIL = "email@example.com";
 
-    public static DoctorEntity mockDoctorEntityWithIdAndEmail(Long id, String email) {
-        DoctorEntity doctorEntity = mockDoctorEntityWithEmail(email);
+    public static DoctorEntity mockDoctorEntity(String email) {
+        return mockDoctorEntity(null, email);
+    }
+
+    public static DoctorEntity mockDoctorEntity(Long id, String email) {
+        DoctorEntity doctorEntity = new DoctorEntity();
         doctorEntity.setId(id);
-        return doctorEntity;
-    }
-
-    public static DoctorEntity mockDoctorEntityWithEmail(String email) {
-        DoctorEntity doctorEntity = mockDoctorEntity();
+        doctorEntity.setName(NAME);
+        doctorEntity.setSurname(SURNAME);
         doctorEntity.setEmail(email);
+        doctorEntity.setSpecializationEnums(List.of(SpecializationEnum.values()));
+        doctorEntity.setImageUrl(IMAGE_URL);
         return doctorEntity;
     }
 
-    public static DoctorTo mockCreateDoctorTo(String email) {
-        return new DoctorTo(
-                null,
-                NAME,
-                SURNAME,
-                email,
-                List.of(SpecializationEnum.values()),
-                IMAGE_URL
-        );
+    public static DoctorTo mockDoctorTo(String email) {
+        return mockDoctorTo(null, email);
     }
 
-    public static DoctorTo mockUpdateDoctorTo(Long id, String email) {
+    public static DoctorTo mockDoctorTo(Long id, String email) {
         return new DoctorTo(
                 id,
                 NAME,
@@ -79,14 +75,5 @@ public class DoctorTestdata {
                 Arguments.of(new DoctorTo(1L, NAME, SURNAME, EMAIL, List.of(), IMAGE_URL)),
                 Arguments.of(new DoctorTo(null, NAME, SURNAME, EMAIL, List.of(SpecializationEnum.values()), IMAGE_URL))
         );
-    }
-
-    private static DoctorEntity mockDoctorEntity() {
-        DoctorEntity doctorEntity = new DoctorEntity();
-        doctorEntity.setName(NAME);
-        doctorEntity.setSurname(SURNAME);
-        doctorEntity.setSpecializationEnums(List.of(SpecializationEnum.values()));
-        doctorEntity.setImageUrl(IMAGE_URL);
-        return doctorEntity;
     }
 }

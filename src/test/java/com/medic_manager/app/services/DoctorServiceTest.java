@@ -3,6 +3,7 @@ package com.medic_manager.app.services;
 import com.medic_manager.app.UnitTestConfig;
 import com.medic_manager.app.entities.DoctorEntity;
 import com.medic_manager.app.repositories.DoctorRepo;
+import com.medic_manager.app.testdata.DoctorTestdata;
 import com.medic_manager.app.tos.DoctorTo;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
@@ -16,7 +17,8 @@ import org.mockito.Mock;
 import java.util.List;
 import java.util.Optional;
 
-import static com.medic_manager.app.testdata.DoctorTestdata.*;
+import static com.medic_manager.app.testdata.DoctorTestdata.mockDoctorEntity;
+import static com.medic_manager.app.testdata.DoctorTestdata.mockDoctorTo;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
@@ -36,7 +38,7 @@ class DoctorServiceTest {
     @Test
     void createDoctor() {
         //given
-        DoctorTo doctorTo = mockCreateDoctorTo(EMAIL_1);
+        DoctorTo doctorTo = DoctorTestdata.mockDoctorTo(EMAIL_1);
         //when
         when(doctorRepo.findByEmailIgnoreCase(EMAIL_1)).thenReturn(Optional.empty());
         doctorService.createDoctor(doctorTo);
@@ -64,8 +66,8 @@ class DoctorServiceTest {
     @Test
     void throwsEntityExistExceptionWhenCreateDoctorWithAlreadyExistingEmail() {
         //given
-        DoctorEntity doctorEntity = mockDoctorEntityWithEmail(EMAIL_1);
-        DoctorTo doctorTo = mockCreateDoctorTo(EMAIL_1);
+        DoctorEntity doctorEntity = DoctorTestdata.mockDoctorEntity(EMAIL_1);
+        DoctorTo doctorTo = DoctorTestdata.mockDoctorTo(EMAIL_1);
         //when
         when(doctorRepo.findByEmailIgnoreCase(EMAIL_1)).thenReturn(Optional.of(doctorEntity));
         //then
@@ -87,8 +89,8 @@ class DoctorServiceTest {
     @Test
     void returnAllDoctors() {
         //given
-        DoctorEntity doctorEntity1 = mockDoctorEntityWithEmail(EMAIL_1);
-        DoctorEntity doctorEntity2 = mockDoctorEntityWithEmail(EMAIL_2);
+        DoctorEntity doctorEntity1 = DoctorTestdata.mockDoctorEntity(EMAIL_1);
+        DoctorEntity doctorEntity2 = DoctorTestdata.mockDoctorEntity(EMAIL_2);
         //when
         when(doctorRepo.findAll()).thenReturn(List.of(doctorEntity1, doctorEntity2));
         List<DoctorEntity> doctors = doctorService.getAllDoctors();
@@ -102,7 +104,7 @@ class DoctorServiceTest {
     @Test
     void returnDoctorById() {
         //given
-        DoctorEntity doctorEntity = mockDoctorEntityWithIdAndEmail(ID, EMAIL_1);
+        DoctorEntity doctorEntity = mockDoctorEntity(ID, EMAIL_1);
         //when
         when(doctorRepo.findById(ID)).thenReturn(Optional.of(doctorEntity));
         DoctorEntity doctorById = doctorService.getDoctorById(ID);
@@ -134,8 +136,8 @@ class DoctorServiceTest {
     @Test
     void updateDoctor() {
         //given
-        DoctorTo doctorTo = mockUpdateDoctorTo(ID, EMAIL_1);
-        DoctorEntity doctorEntity = mockDoctorEntityWithIdAndEmail(ID, EMAIL_2);
+        DoctorTo doctorTo = mockDoctorTo(ID, EMAIL_1);
+        DoctorEntity doctorEntity = mockDoctorEntity(ID, EMAIL_2);
         //when
         when(doctorRepo.findByEmailIgnoreCase(EMAIL_1)).thenReturn(Optional.empty());
         when(doctorRepo.findById(ID)).thenReturn(Optional.of(doctorEntity));
@@ -165,8 +167,8 @@ class DoctorServiceTest {
     @Test
     void throwsEntityExistExceptionWhenUpdateDoctorWithAlreadyExistingEmail() {
         //given
-        DoctorEntity doctorEntity = mockDoctorEntityWithIdAndEmail(ID, EMAIL_1);
-        DoctorTo doctorTo = mockUpdateDoctorTo(ID, EMAIL_1);
+        DoctorEntity doctorEntity = mockDoctorEntity(ID, EMAIL_1);
+        DoctorTo doctorTo = mockDoctorTo(ID, EMAIL_1);
         //when
         when(doctorRepo.findByEmailIgnoreCase(EMAIL_1)).thenReturn(Optional.of(doctorEntity));
         //then

@@ -8,7 +8,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.util.Optional;
 
-import static com.medic_manager.app.testdata.DoctorTestdata.mockDoctorEntityWithEmail;
+import static com.medic_manager.app.testdata.DoctorTestdata.mockDoctorEntity;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @UnitTestConfig
@@ -22,7 +22,7 @@ class DoctorRepoTest {
     @Test
     void findByEmailIgnoreCase() {
         //given
-        DoctorEntity doctor = mockDoctorEntityWithEmail(EMAIL);
+        DoctorEntity doctor = mockDoctorEntity(EMAIL);
         DoctorEntity savedDoctor = doctorRepo.save(doctor);
         //when
         Optional<DoctorEntity> foundDoctor = doctorRepo.findByEmailIgnoreCase("EmAiL@eXaMpLe.CoM");
@@ -34,7 +34,7 @@ class DoctorRepoTest {
     @Test
     void notFindByEmailIgnoreCaseWhenNotExistingEmail() {
         //given
-        DoctorEntity doctor = mockDoctorEntityWithEmail(EMAIL);
+        DoctorEntity doctor = mockDoctorEntity(EMAIL);
         doctorRepo.save(doctor);
         //when
         Optional<DoctorEntity> foundDoctor = doctorRepo.findByEmailIgnoreCase("NOT_EXISTING_EMAIL");
@@ -45,7 +45,7 @@ class DoctorRepoTest {
     @Test
     void notFindByEmailIgnoreCaseWhenSearchByNotFullLengthEmail() {
         //given
-        DoctorEntity doctor = mockDoctorEntityWithEmail(EMAIL);
+        DoctorEntity doctor = mockDoctorEntity(EMAIL);
         doctorRepo.save(doctor);
         //when
         Optional<DoctorEntity> foundDoctor = doctorRepo.findByEmailIgnoreCase("email@example.co");

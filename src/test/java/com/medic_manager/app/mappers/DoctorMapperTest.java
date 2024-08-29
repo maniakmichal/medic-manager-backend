@@ -5,7 +5,7 @@ import com.medic_manager.app.entities.DoctorEntity;
 import com.medic_manager.app.tos.DoctorTo;
 import org.junit.jupiter.api.Test;
 
-import static com.medic_manager.app.testdata.DoctorTestdata.mockDoctorEntityWithIdAndEmail;
+import static com.medic_manager.app.testdata.DoctorTestdata.mockDoctorEntity;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @UnitTestConfig
@@ -18,7 +18,7 @@ class DoctorMapperTest {
         //given
         Long id = 1L;
         String email = "email@email.com";
-        DoctorEntity doctorEntity = mockDoctorEntityWithIdAndEmail(id, email);
+        DoctorEntity doctorEntity = mockDoctorEntity(id, email);
         //when
         DoctorTo doctorTo = doctorMapper.toDoctorTo(doctorEntity);
         //then

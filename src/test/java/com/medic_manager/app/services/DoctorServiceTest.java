@@ -178,6 +178,19 @@ class DoctorServiceTest {
     }
 
     @Test
+    void throwsEntityNotFoundExceptionWhenUpdateDoctorWithNotExistingId() {
+        //given
+        DoctorTo doctorTo = mockDoctorTo(ID, EMAIL_1);
+        //when
+        when(doctorRepo.findByEmailIgnoreCase(EMAIL_1)).thenReturn(Optional.empty());
+        when(doctorRepo.findById(ID)).thenReturn(Optional.empty());
+        //then
+        assertThatThrownBy(
+                () -> doctorService.updateDoctor(doctorTo)
+        ).isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
     void deleteDoctor() {
         //given
         //when

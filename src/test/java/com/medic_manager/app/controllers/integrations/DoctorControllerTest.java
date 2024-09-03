@@ -5,7 +5,6 @@ import com.medic_manager.app.common.ErrorResponseUtil;
 import com.medic_manager.app.entities.DoctorEntity;
 import com.medic_manager.app.mappers.DoctorMapper;
 import com.medic_manager.app.repositories.DoctorRepo;
-import com.medic_manager.app.testdata.DoctorTestdata;
 import com.medic_manager.app.tos.DoctorTo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
@@ -20,6 +19,7 @@ import org.springframework.http.*;
 import java.util.List;
 import java.util.Optional;
 
+import static com.medic_manager.app.testdata.DoctorTestdata.mockDoctorEntity;
 import static com.medic_manager.app.testdata.DoctorTestdata.mockDoctorTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -56,7 +56,7 @@ class DoctorControllerTest {
         @Test
         void createDoctor() {
             //given
-            DoctorTo doctor = DoctorTestdata.mockDoctorTo(EMAIL_1);
+            DoctorTo doctor = mockDoctorTo(EMAIL_1);
             HttpEntity<DoctorTo> request = createRequestBody(doctor);
             //when
             ResponseEntity<DoctorTo> response = restTemplate.postForEntity(CREATE_URL, request, DoctorTo.class);
@@ -88,9 +88,9 @@ class DoctorControllerTest {
         @Test
         void returnConflictWhenCreateDoctorWithAlreadyExistingEmail() {
             //given
-            DoctorEntity existingDoctor = DoctorTestdata.mockDoctorEntity(EMAIL_1);
+            DoctorEntity existingDoctor = mockDoctorEntity(EMAIL_1);
             doctorRepo.save(existingDoctor);
-            DoctorTo newDoctor = DoctorTestdata.mockDoctorTo(EMAIL_1);
+            DoctorTo newDoctor = mockDoctorTo(EMAIL_1);
             HttpEntity<DoctorTo> request = createRequestBody(newDoctor);
             //when
             ResponseEntity<ErrorResponseUtil> response = restTemplate.postForEntity(CREATE_URL, request, ErrorResponseUtil.class);
@@ -108,8 +108,8 @@ class DoctorControllerTest {
         @Test
         void getAllDoctors() {
             //given
-            DoctorEntity doctor1 = DoctorTestdata.mockDoctorEntity(EMAIL_1);
-            DoctorEntity doctor2 = DoctorTestdata.mockDoctorEntity(EMAIL_2);
+            DoctorEntity doctor1 = mockDoctorEntity(EMAIL_1);
+            DoctorEntity doctor2 = mockDoctorEntity(EMAIL_2);
             doctorRepo.saveAll(List.of(doctor1, doctor2));
             //when
             ResponseEntity<List<DoctorTo>> response = restTemplate.exchange(
@@ -151,7 +151,7 @@ class DoctorControllerTest {
         @Test
         void getDoctorById() {
             //given
-            DoctorEntity doctor = DoctorTestdata.mockDoctorEntity(EMAIL_1);
+            DoctorEntity doctor = mockDoctorEntity(EMAIL_1);
             DoctorEntity savedDoctor = doctorRepo.save(doctor);
             //when
             ResponseEntity<DoctorTo> response = restTemplate.getForEntity(GET_BY_ID_URL + savedDoctor.getId(), DoctorTo.class);
@@ -190,7 +190,7 @@ class DoctorControllerTest {
         @Test
         void updateDoctor() {
             //given
-            DoctorEntity doctorEntity = DoctorTestdata.mockDoctorEntity(EMAIL_1);
+            DoctorEntity doctorEntity = mockDoctorEntity(EMAIL_1);
             DoctorEntity savedDoctor = doctorRepo.save(doctorEntity);
             DoctorTo updateDoctorTo = mockDoctorTo(savedDoctor.getId(), EMAIL_2);
             HttpEntity<DoctorTo> request = createRequestBody(updateDoctorTo);
@@ -235,7 +235,7 @@ class DoctorControllerTest {
         @Test
         void returnConflictWhenUpdateDoctorWithAlreadyExistingEmail() {
             //given
-            DoctorEntity doctor = DoctorTestdata.mockDoctorEntity(EMAIL_1);
+            DoctorEntity doctor = mockDoctorEntity(EMAIL_1);
             DoctorEntity existingDoctor = doctorRepo.save(doctor);
             DoctorTo updateDoctor = mockDoctorTo(existingDoctor.getId(), EMAIL_1);
             HttpEntity<DoctorTo> request = createRequestBody(updateDoctor);
@@ -257,7 +257,7 @@ class DoctorControllerTest {
         @Test
         void returnBadRequestWhenUpdateDoctorWithNotExistingId() {
             //given
-            DoctorEntity doctor = DoctorTestdata.mockDoctorEntity(EMAIL_1);
+            DoctorEntity doctor = mockDoctorEntity(EMAIL_1);
             doctorRepo.save(doctor);
             DoctorTo updateDoctor = mockDoctorTo(Long.MAX_VALUE, EMAIL_2);
             HttpEntity<DoctorTo> request = createRequestBody(updateDoctor);
@@ -283,8 +283,8 @@ class DoctorControllerTest {
         @Test
         void deleteDoctor() {
             //given
-            DoctorEntity doctor1 = DoctorTestdata.mockDoctorEntity(EMAIL_1);
-            DoctorEntity doctor2 = DoctorTestdata.mockDoctorEntity(EMAIL_2);
+            DoctorEntity doctor1 = mockDoctorEntity(EMAIL_1);
+            DoctorEntity doctor2 = mockDoctorEntity(EMAIL_2);
             DoctorEntity savedDoctor1 = doctorRepo.save(doctor1);
             DoctorEntity savedDoctor2 = doctorRepo.save(doctor2);
             //when
@@ -319,7 +319,7 @@ class DoctorControllerTest {
         @Test
         void returnNoContentWhenDeleteDoctorByNotExistingId() {
             //given
-            DoctorEntity doctor = DoctorTestdata.mockDoctorEntity(EMAIL_1);
+            DoctorEntity doctor = mockDoctorEntity(EMAIL_1);
             DoctorEntity savedDoctor = doctorRepo.save(doctor);
             //when
             ResponseEntity<Void> response = restTemplate.exchange(

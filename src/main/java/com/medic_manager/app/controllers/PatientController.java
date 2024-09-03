@@ -4,10 +4,8 @@ import com.medic_manager.app.mappers.PatientMapper;
 import com.medic_manager.app.services.PatientService;
 import com.medic_manager.app.tos.PatientTo;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -18,9 +16,15 @@ public class PatientController {
     private final PatientService patientService;
     private final PatientMapper patientMapper;
 
-    public PatientController(final PatientService service, PatientMapper mapper) {
+    public PatientController(final PatientService service, final PatientMapper mapper) {
         this.patientService = service;
         this.patientMapper = mapper;
+    }
+
+    @PostMapping("create-patient")
+    @ResponseStatus(HttpStatus.CREATED)
+    public PatientTo createPatient(@RequestBody @Validated PatientTo patientTo) {
+        return patientMapper.toPatientTo(patientService.createPatient(patientTo));
     }
 
     @GetMapping("patients")
@@ -30,5 +34,23 @@ public class PatientController {
                 .stream()
                 .map(patientMapper::toPatientTo)
                 .toList();
+    }
+
+    @GetMapping("patient/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public PatientTo getPatientById(@PathVariable Long id) {
+        return patientMapper.toPatientTo(patientService.getPatientById(id));
+    }
+
+    @PutMapping("update-patient")
+    @ResponseStatus(HttpStatus.OK)
+    public PatientTo updatePatient(@RequestBody @Validated PatientTo patientTo) {
+        return patientMapper.toPatientTo(patientService.updatePatient(patientTo));
+    }
+
+    @DeleteMapping("delete-patient/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletePatient(@PathVariable Long id) {
+        patientService.deletePatient(id);
     }
 }

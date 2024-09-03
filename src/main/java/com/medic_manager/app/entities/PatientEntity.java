@@ -2,13 +2,11 @@ package com.medic_manager.app.entities;
 
 import com.medic_manager.app.enums.GenderEnum;
 import jakarta.persistence.*;
-import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "patient", uniqueConstraints = @UniqueConstraint(columnNames = "email"))
-@Validated
 public class PatientEntity extends UserEntity {
 
     @Column(name = "birthdate", nullable = false)

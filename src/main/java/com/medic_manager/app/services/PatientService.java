@@ -133,6 +133,8 @@ public class PatientService {
         } else {
             return patientTo.name().isEmpty()
                     || patientTo.surname().isEmpty()
+                    // TODO - add the missing checking of blank string for doctor and patient dtos
+//                    || patientTo.surname().isBlank()
                     || patientTo.email().isEmpty();
         }
     }

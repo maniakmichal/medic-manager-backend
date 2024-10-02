@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.logging.Logger;
 
+import static com.medic_manager.app.common.LoggerTextUtil.*;
+
 @Service
 @Transactional
 public class AppointmentService {
@@ -26,6 +28,9 @@ public class AppointmentService {
     }
 
     public AppointmentEntity createAppointment(AppointmentTo appointmentTo) {
+        validateCreateTo(appointmentTo);
+        //TODO implement business logic to check if already existing
+        logger.info(() -> getCreateNewEntity(AppointmentEntity.class, appointmentTo));
         AppointmentEntity appointmentEntity = generateAppointment(appointmentTo);
         return appointmentRepo.save(appointmentEntity);
     }
@@ -42,5 +47,22 @@ public class AppointmentService {
         appointmentEntity.setDoctorEntity(doctorEntity);
         appointmentEntity.setPatientEntity(patientEntity);
         return appointmentEntity;
+    }
+
+    private void validateCreateTo(AppointmentTo appointmentTo) throws IllegalArgumentException {
+        if (isToInvalid(appointmentTo) || appointmentTo.id() != null) {
+            logger.severe(getErrorNullOrIncorrectTOPassedAsArgumentToMethod());
+            throw new IllegalArgumentException(getErrorNullOrIncorrectTOPassedAsArgumentToMethod());
+        }
+    }
+
+    private boolean isToInvalid(AppointmentTo appointmentTo) {
+        logger.info(getCheckingIfToInvalid());
+        return appointmentTo == null
+                || appointmentTo.appointmentDate() == null
+                || appointmentTo.appointmentDayOfWeek() == null
+                || appointmentTo.appointmentStatusEnum() == null
+                || appointmentTo.doctorId() == null
+                || appointmentTo.patientId() == null;
     }
 }

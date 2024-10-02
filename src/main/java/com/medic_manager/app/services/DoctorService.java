@@ -1,8 +1,6 @@
 package com.medic_manager.app.services;
 
-import com.medic_manager.app.common.LoggerTextUtil;
 import com.medic_manager.app.entities.DoctorEntity;
-import com.medic_manager.app.enums.SpecializationEnum;
 import com.medic_manager.app.repositories.DoctorRepo;
 import com.medic_manager.app.tos.DoctorTo;
 import jakarta.persistence.EntityExistsException;
@@ -43,7 +41,7 @@ public class DoctorService {
     public DoctorEntity getDoctorById(Long id) {
         logger.info(() -> getGetEntityById(DoctorEntity.class, id));
         if (id == null) {
-            logger.severe(LoggerTextUtil::getErrorNullPassedAsArgumentToMethod);
+            logger.severe(getErrorNullPassedAsArgumentToMethod());
             throw new IllegalArgumentException(getErrorNullPassedAsArgumentToMethod());
         }
         return doctorRepo.findById(id)
@@ -119,24 +117,15 @@ public class DoctorService {
     }
 
     private boolean isToInvalid(DoctorTo doctorTo) {
-        logger.info(LoggerTextUtil::getCheckingIfToInvalid);
-        if (
-                doctorTo == null
-                        || doctorTo.name() == null
-                        || doctorTo.surname() == null
-                        || doctorTo.email() == null
-                        || isListOfEnumsNull(doctorTo.specializationEnums())
-        ) {
-            return true;
-        } else {
-            return doctorTo.name().isBlank()
-                    || doctorTo.surname().isBlank()
-                    || doctorTo.email().isBlank()
-                    || doctorTo.specializationEnums().isEmpty();
-        }
-    }
-
-    private boolean isListOfEnumsNull(List<SpecializationEnum> list) {
-        return list == null;
+        logger.info(getCheckingIfToInvalid());
+        return doctorTo == null
+                || doctorTo.name() == null
+                || doctorTo.surname() == null
+                || doctorTo.email() == null
+                || doctorTo.specializationEnums() == null
+                || doctorTo.name().isBlank()
+                || doctorTo.surname().isBlank()
+                || doctorTo.email().isBlank()
+                || doctorTo.specializationEnums().isEmpty();
     }
 }

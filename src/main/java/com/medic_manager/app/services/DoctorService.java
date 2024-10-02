@@ -129,9 +129,9 @@ public class DoctorService {
         ) {
             return true;
         } else {
-            return doctorTo.name().isEmpty()
-                    || doctorTo.surname().isEmpty()
-                    || doctorTo.email().isEmpty()
+            return doctorTo.name().isBlank()
+                    || doctorTo.surname().isBlank()
+                    || doctorTo.email().isBlank()
                     || doctorTo.specializationEnums().isEmpty();
         }
     }

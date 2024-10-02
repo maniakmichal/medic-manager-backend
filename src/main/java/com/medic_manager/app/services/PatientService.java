@@ -1,8 +1,6 @@
 package com.medic_manager.app.services;
 
-import com.medic_manager.app.common.LoggerTextUtil;
 import com.medic_manager.app.entities.PatientEntity;
-import com.medic_manager.app.enums.GenderEnum;
 import com.medic_manager.app.repositories.PatientRepo;
 import com.medic_manager.app.tos.PatientTo;
 import jakarta.persistence.EntityExistsException;
@@ -10,7 +8,6 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -44,7 +41,7 @@ public class PatientService {
     public PatientEntity getPatientById(Long id) {
         logger.info(() -> getGetEntityById(PatientEntity.class, id));
         if (id == null) {
-            logger.severe(LoggerTextUtil::getErrorNullPassedAsArgumentToMethod);
+            logger.severe(getErrorNullPassedAsArgumentToMethod());
             throw new IllegalArgumentException(getErrorNullPassedAsArgumentToMethod());
         }
         return patientRepo.findById(id)
@@ -120,28 +117,15 @@ public class PatientService {
     }
 
     private boolean isToInvalid(PatientTo patientTo) {
-        logger.info(LoggerTextUtil::getCheckingIfToInvalid);
-        if (
-                patientTo == null
-                        || patientTo.name() == null
-                        || patientTo.surname() == null
-                        || patientTo.email() == null
-                        || isBirthdateNull(patientTo.birthdate())
-                        || isGenderEnumNull(patientTo.genderEnum())
-        ) {
-            return true;
-        } else {
-            return patientTo.name().isBlank()
-                    || patientTo.surname().isBlank()
-                    || patientTo.email().isBlank();
-        }
-    }
-
-    private boolean isGenderEnumNull(GenderEnum genderEnum) {
-        return genderEnum == null;
-    }
-
-    private boolean isBirthdateNull(LocalDate date) {
-        return date == null;
+        logger.info(getCheckingIfToInvalid());
+        return patientTo == null
+                || patientTo.name() == null
+                || patientTo.surname() == null
+                || patientTo.email() == null
+                || patientTo.genderEnum() == null
+                || patientTo.birthdate() == null
+                || patientTo.name().isBlank()
+                || patientTo.surname().isBlank()
+                || patientTo.email().isBlank();
     }
 }

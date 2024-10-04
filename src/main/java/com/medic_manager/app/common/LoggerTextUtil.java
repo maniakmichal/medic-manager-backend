@@ -1,5 +1,7 @@
 package com.medic_manager.app.common;
 
+import java.time.DayOfWeek;
+
 public class LoggerTextUtil {
     private static final String LIST_ALL_ENTITIES = "List all entities of %s.";
     private static final String CHECKING_IF_TO_INVALID = "Checking if TO invalid.";
@@ -11,6 +13,8 @@ public class LoggerTextUtil {
     private static final String ERROR_NULL_PASSED_AS_ARGUMENT_TO_METHOD = "ERROR: null passed as argument to method.";
     private static final String ERROR_ENTITY_WITH_PROPERTY_ALREADY_EXIST = "ERROR: Cannot create new/update %s with %s because it already exist.";
     private static final String ERROR_ENTITY_WITH_ID_NOT_FOUND = "ERROR: entity of %s with ID: %d not found.";
+    private static final String ERROR_INCORRECT_DAY_OF_WEEK = "ERROR: incorrect day of week: %s passed for booking appointment.";
+    private static final String ERROR_INCORRECT_HOUR_OR_MINUTES = "ERROR: incorrect hour: %d or minutes: %d passed for booking appointment.";
 
     private LoggerTextUtil() {
     }
@@ -53,5 +57,13 @@ public class LoggerTextUtil {
 
     public static String getErrorEntityWithIdNotFound(Class<?> name, Long id) {
         return ERROR_ENTITY_WITH_ID_NOT_FOUND.formatted(name.getSimpleName(), id);
+    }
+
+    public static String gerErrorIncorrectDayOfWeek(DayOfWeek dayOfWeek) {
+        return ERROR_INCORRECT_DAY_OF_WEEK.formatted(dayOfWeek.toString());
+    }
+
+    public static String getErrorIncorrectHourOrMinutes(byte hour, byte minutes) {
+        return ERROR_INCORRECT_HOUR_OR_MINUTES.formatted(hour, minutes);
     }
 }

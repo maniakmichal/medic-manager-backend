@@ -3,13 +3,16 @@ package com.medic_manager.app.services;
 import com.medic_manager.app.entities.AppointmentEntity;
 import com.medic_manager.app.entities.DoctorEntity;
 import com.medic_manager.app.entities.PatientEntity;
+import com.medic_manager.app.exceptions.AppointmentCreationFailedBusinessException;
 import com.medic_manager.app.exceptions.IncorrectDayOfWeekBusinessException;
+import com.medic_manager.app.exceptions.IncorrectHourOrMinutesBusinessException;
 import com.medic_manager.app.repositories.AppointmentRepo;
 import com.medic_manager.app.tos.AppointmentTo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
+import java.util.List;
 import java.util.logging.Logger;
 
 import static com.medic_manager.app.common.LoggerTextUtil.*;
@@ -18,6 +21,8 @@ import static com.medic_manager.app.common.LoggerTextUtil.*;
 @Transactional
 public class AppointmentService {
 
+    private static final String ERROR_DOCTOR_BUSY = "Doctor with ID: %d has got already appointment planned in the same date and time.";
+    private static final String ERROR_PATIENT_BUSY = "Patient with ID: %d has got already appointment planned in the same date and time.";
     private final AppointmentRepo appointmentRepo;
     private final DoctorService doctorService;
     private final PatientService patientService;
@@ -31,9 +36,9 @@ public class AppointmentService {
 
     public AppointmentEntity createAppointment(AppointmentTo appointmentTo) {
         validateCreateTo(appointmentTo);
-        //TODO implement business logic to check if already existing
         isValidDayOfWeek(appointmentTo.appointmentDayOfWeek());
         isValidHourAndMinutes(appointmentTo.appointmentHour(), appointmentTo.appointmentMinute());
+        isAppointmentValidToCreate(appointmentTo);
         logger.info(() -> getCreateNewEntity(AppointmentEntity.class, appointmentTo));
         AppointmentEntity appointmentEntity = generateAppointment(appointmentTo);
         return appointmentRepo.save(appointmentEntity);
@@ -72,16 +77,15 @@ public class AppointmentService {
 
     private void isValidDayOfWeek(DayOfWeek dayOfWeek) {
         if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
-            logger.severe(gerErrorIncorrectDayOfWeek(dayOfWeek));
+            logger.severe(() -> gerErrorIncorrectDayOfWeek(dayOfWeek));
             throw new IncorrectDayOfWeekBusinessException(gerErrorIncorrectDayOfWeek(dayOfWeek));
         }
     }
 
     private void isValidHourAndMinutes(byte hour, byte minutes) {
         if (isHourInvalid(hour) || isMinuteInvalid(minutes)) {
-            logger.severe(getErrorIncorrectHourOrMinutes(hour, minutes));
-            //TODO prepare business exception
-            throw new RuntimeException(getErrorIncorrectHourOrMinutes(hour, minutes));
+            logger.severe(() -> getErrorIncorrectHourOrMinutes(hour, minutes));
+            throw new IncorrectHourOrMinutesBusinessException(getErrorIncorrectHourOrMinutes(hour, minutes));
         }
     }
 
@@ -97,5 +101,42 @@ public class AppointmentService {
             case 0, 15, 30, 45 -> false;
             default -> true;
         };
+    }
+
+    private void isAppointmentValidToCreate(AppointmentTo appointmentTo) {
+        checkIfDoctorIsBusy(appointmentTo);
+        checkIfPatientIsBusy(appointmentTo);
+    }
+
+    private void checkIfDoctorIsBusy(AppointmentTo appointmentTo) {
+        List<AppointmentEntity> doctorAppointments = appointmentRepo.findAllByDoctorIdAndAppointmentDate(
+                appointmentTo.doctorId(),
+                appointmentTo.appointmentDate()
+        );
+        List<AppointmentEntity> filteredDoctorAppointments = doctorAppointments.stream()
+                .filter(appointment -> appointment.getAppointmentHour() == appointmentTo.appointmentHour())
+                .filter(appointment -> appointment.getAppointmentMinute() == appointmentTo.appointmentMinute())
+                .toList();
+        if (!filteredDoctorAppointments.isEmpty()) {
+            String message = ERROR_DOCTOR_BUSY.formatted(appointmentTo.doctorId());
+            logger.severe(getErrorAppointmentCreationFailedDueTo() + message);
+            throw new AppointmentCreationFailedBusinessException(getErrorAppointmentCreationFailedDueTo() + message);
+        }
+    }
+
+    private void checkIfPatientIsBusy(AppointmentTo appointmentTo) {
+        List<AppointmentEntity> patientAppointments = appointmentRepo.findAllByPatientIdAndAppointmentDate(
+                appointmentTo.patientId(),
+                appointmentTo.appointmentDate()
+        );
+        List<AppointmentEntity> filteredPatientAppointments = patientAppointments.stream()
+                .filter(appointment -> appointment.getAppointmentHour() == appointmentTo.appointmentHour())
+                .filter(appointment -> appointment.getAppointmentMinute() == appointmentTo.appointmentMinute())
+                .toList();
+        if (!filteredPatientAppointments.isEmpty()) {
+            String message = ERROR_PATIENT_BUSY.formatted(appointmentTo.patientId());
+            logger.severe(getErrorAppointmentCreationFailedDueTo() + message);
+            throw new AppointmentCreationFailedBusinessException(getErrorAppointmentCreationFailedDueTo() + message);
+        }
     }
 }

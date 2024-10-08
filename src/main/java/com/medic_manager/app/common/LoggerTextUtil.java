@@ -15,6 +15,7 @@ public class LoggerTextUtil {
     private static final String ERROR_ENTITY_WITH_ID_NOT_FOUND = "ERROR: entity of %s with ID: %d not found.";
     private static final String ERROR_INCORRECT_DAY_OF_WEEK = "ERROR: incorrect day of week: %s passed for booking appointment.";
     private static final String ERROR_INCORRECT_HOUR_OR_MINUTES = "ERROR: incorrect hour: %d or minutes: %d passed for booking appointment.";
+    private static final String ERROR_APPOINTMENT_CREATION_FAILED_DUE_TO = "ERROR: appointment creation failed due to: %s";
 
     private LoggerTextUtil() {
     }
@@ -65,5 +66,9 @@ public class LoggerTextUtil {
 
     public static String getErrorIncorrectHourOrMinutes(byte hour, byte minutes) {
         return ERROR_INCORRECT_HOUR_OR_MINUTES.formatted(hour, minutes);
+    }
+
+    public static String getErrorAppointmentCreationFailedDueTo() {
+        return ERROR_APPOINTMENT_CREATION_FAILED_DUE_TO;
     }
 }

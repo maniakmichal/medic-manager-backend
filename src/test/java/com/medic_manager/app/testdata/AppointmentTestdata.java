@@ -2,10 +2,13 @@ package com.medic_manager.app.testdata;
 
 import com.medic_manager.app.entities.AppointmentEntity;
 import com.medic_manager.app.enums.AppointmentStatusEnum;
+import com.medic_manager.app.tos.AppointmentTo;
+import org.junit.jupiter.params.provider.Arguments;
 import org.springframework.boot.test.context.TestComponent;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.stream.Stream;
 
 @TestComponent
 public class AppointmentTestdata {
@@ -26,5 +29,36 @@ public class AppointmentTestdata {
         appointmentEntity.setDoctorEntity(DoctorTestdata.mockDoctorEntity(ID, EMAIL));
         appointmentEntity.setPatientEntity(PatientTestdata.mockPatientEntity(ID, EMAIL));
         return appointmentEntity;
+    }
+
+    public static AppointmentTo mockAppointmentTo() {
+        return new AppointmentTo(
+                null,
+                APPOINTMENT_DATE,
+                DayOfWeek.TUESDAY,
+                APPOINTMENT_HOUR,
+                APPOINTMENT_MINUTE,
+                AppointmentStatusEnum.PENDING,
+                ID,
+                ID
+        );
+    }
+
+    public static Stream<Arguments> provideInvalidCreateAppointmentToList() {
+        return Stream.of(
+                null,
+                Arguments.of(new AppointmentTo(null, null, DayOfWeek.TUESDAY, APPOINTMENT_HOUR, APPOINTMENT_MINUTE, AppointmentStatusEnum.PENDING, ID, ID)),
+                Arguments.of(new AppointmentTo(null, APPOINTMENT_DATE, null, APPOINTMENT_HOUR, APPOINTMENT_MINUTE, AppointmentStatusEnum.PENDING, ID, ID)),
+                Arguments.of(new AppointmentTo(null, APPOINTMENT_DATE, DayOfWeek.TUESDAY, APPOINTMENT_HOUR, APPOINTMENT_MINUTE, null, ID, ID)),
+                Arguments.of(new AppointmentTo(null, APPOINTMENT_DATE, DayOfWeek.TUESDAY, APPOINTMENT_HOUR, APPOINTMENT_MINUTE, AppointmentStatusEnum.PENDING, null, ID)),
+                Arguments.of(new AppointmentTo(null, APPOINTMENT_DATE, DayOfWeek.TUESDAY, APPOINTMENT_HOUR, APPOINTMENT_MINUTE, AppointmentStatusEnum.PENDING, ID, null))
+        );
+    }
+
+    public static Stream<Arguments> provideInvalidDayOfWeekList() {
+        return Stream.of(
+                Arguments.of(new AppointmentTo(null, APPOINTMENT_DATE, DayOfWeek.SATURDAY, APPOINTMENT_HOUR, APPOINTMENT_MINUTE, AppointmentStatusEnum.PENDING, ID, ID)),
+                Arguments.of(new AppointmentTo(null, APPOINTMENT_DATE, DayOfWeek.SUNDAY, APPOINTMENT_HOUR, APPOINTMENT_MINUTE, AppointmentStatusEnum.PENDING, ID, ID))
+        );
     }
 }

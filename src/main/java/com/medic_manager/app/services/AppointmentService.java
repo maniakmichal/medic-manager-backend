@@ -8,6 +8,7 @@ import com.medic_manager.app.exceptions.IncorrectDayOfWeekBusinessException;
 import com.medic_manager.app.exceptions.IncorrectHourOrMinutesBusinessException;
 import com.medic_manager.app.repositories.AppointmentRepo;
 import com.medic_manager.app.tos.AppointmentTo;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,13 +43,39 @@ public class AppointmentService {
         DoctorEntity doctorEntity = doctorService.getDoctorById(appointmentTo.doctorId());
         isAppointmentValidToCreate(appointmentTo, doctorEntity, patientEntity);
         logger.info(() -> getCreateNewEntity(AppointmentEntity.class, appointmentTo));
-        AppointmentEntity appointmentEntity = generateAppointment(appointmentTo);
+        AppointmentEntity appointmentEntity = generateAppointment(appointmentTo, doctorEntity, patientEntity);
         return appointmentRepo.save(appointmentEntity);
     }
 
-    private AppointmentEntity generateAppointment(AppointmentTo appointmentTo) {
-        DoctorEntity doctorEntity = doctorService.getDoctorById(appointmentTo.doctorId());
-        PatientEntity patientEntity = patientService.getPatientById(appointmentTo.patientId());
+    public List<AppointmentEntity> getAllAppointments() {
+        logger.info(() -> getListAllEntities(AppointmentEntity.class));
+        return appointmentRepo.findAll();
+    }
+
+    public AppointmentEntity getAppointmentById(Long id) {
+        logger.info(() -> getGetEntityById(AppointmentEntity.class, id));
+        return findById(id);
+    }
+
+    private AppointmentEntity findById(Long id) {
+        if (id == null) {
+            logger.severe(getErrorNullPassedAsArgumentToMethod());
+            throw new IllegalArgumentException(getErrorNullPassedAsArgumentToMethod());
+        }
+        return appointmentRepo.findById(id)
+                .orElseThrow(
+                        () -> {
+                            logger.severe(getErrorEntityWithIdNotFound(AppointmentEntity.class, id));
+                            return new EntityNotFoundException(getErrorEntityWithIdNotFound(AppointmentEntity.class, id));
+                        }
+                );
+    }
+
+    private AppointmentEntity generateAppointment(
+            AppointmentTo appointmentTo,
+            DoctorEntity doctorEntity,
+            PatientEntity patientEntity
+    ) {
         AppointmentEntity appointmentEntity = new AppointmentEntity();
         appointmentEntity.setAppointmentDate(appointmentTo.appointmentDate());
         appointmentEntity.setAppointmentHour(appointmentTo.appointmentHour());
@@ -105,7 +132,11 @@ public class AppointmentService {
         };
     }
 
-    private void isAppointmentValidToCreate(AppointmentTo appointmentTo, DoctorEntity doctorEntity, PatientEntity patientEntity) {
+    private void isAppointmentValidToCreate(
+            AppointmentTo appointmentTo,
+            DoctorEntity doctorEntity,
+            PatientEntity patientEntity
+    ) {
         checkIfDoctorIsBusy(appointmentTo, doctorEntity);
         checkIfPatientIsBusy(appointmentTo, patientEntity);
     }

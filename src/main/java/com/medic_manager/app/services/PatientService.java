@@ -40,27 +40,13 @@ public class PatientService {
 
     public PatientEntity getPatientById(Long id) {
         logger.info(() -> getGetEntityById(PatientEntity.class, id));
-        if (id == null) {
-            logger.severe(getErrorNullPassedAsArgumentToMethod());
-            throw new IllegalArgumentException(getErrorNullPassedAsArgumentToMethod());
-        }
-        return patientRepo.findById(id)
-                .orElseThrow(
-                        () -> {
-                            logger.severe(getErrorEntityWithIdNotFound(PatientEntity.class, id));
-                            return new EntityNotFoundException(getErrorEntityWithIdNotFound(PatientEntity.class, id));
-                        }
-                );
+        return findById(id);
     }
 
     public PatientEntity updatePatient(PatientTo patientTo) {
         validateUpdateTo(patientTo);
         checkIfEntityAlreadyExist(patientTo.email());
-        PatientEntity persistedPatient = patientRepo.findById(patientTo.id())
-                .orElseThrow(() -> {
-                    logger.severe(getErrorEntityWithIdNotFound(PatientEntity.class, patientTo.id()));
-                    return new EntityNotFoundException(getErrorEntityWithIdNotFound(PatientEntity.class, patientTo.id()));
-                });
+        PatientEntity persistedPatient = findById(patientTo.id());
         logger.info(() -> getUpdateEntity(PatientEntity.class, patientTo));
         PatientEntity patientEntity = updatePatientEntity(persistedPatient, patientTo);
         return patientRepo.save(patientEntity);
@@ -73,6 +59,20 @@ public class PatientService {
         }
         logger.info(() -> getDeleteEntityById(PatientEntity.class, id));
         patientRepo.deleteById(id);
+    }
+
+    private PatientEntity findById(Long id) {
+        if (id == null) {
+            logger.severe(getErrorNullPassedAsArgumentToMethod());
+            throw new IllegalArgumentException(getErrorNullPassedAsArgumentToMethod());
+        }
+        return patientRepo.findById(id)
+                .orElseThrow(
+                        () -> {
+                            logger.severe(getErrorEntityWithIdNotFound(PatientEntity.class, id));
+                            return new EntityNotFoundException(getErrorEntityWithIdNotFound(PatientEntity.class, id));
+                        }
+                );
     }
 
     private PatientEntity generatePatient(PatientTo patientTo) {

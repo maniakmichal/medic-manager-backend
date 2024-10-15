@@ -5,11 +5,13 @@ import com.medic_manager.app.entities.AppointmentEntity;
 import com.medic_manager.app.entities.DoctorEntity;
 import com.medic_manager.app.entities.PatientEntity;
 import com.medic_manager.app.exceptions.IncorrectDayOfWeekBusinessException;
+import com.medic_manager.app.exceptions.IncorrectHourOrMinutesBusinessException;
 import com.medic_manager.app.repositories.AppointmentRepo;
 import com.medic_manager.app.testdata.AppointmentTestdata;
 import com.medic_manager.app.testdata.DoctorTestdata;
 import com.medic_manager.app.testdata.PatientTestdata;
 import com.medic_manager.app.tos.AppointmentTo;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -87,7 +89,55 @@ class AppointmentServiceTest {
         ).isInstanceOf(IncorrectDayOfWeekBusinessException.class);
     }
 
-    //TODO - add parametrized tests for minutes and hours exception
+    @ParameterizedTest
+    @MethodSource("com.medic_manager.app.testdata.AppointmentTestdata#provideInvalidHourList")
+    void throwsIncorrectHourOrMinutesBusinessExceptionWhenCreateAppointmentWithIncorrectHour(AppointmentTo appointmentTo) {
+        //given
+        //when
+        //then
+        assertThatThrownBy(
+                () -> appointmentService.createAppointment(appointmentTo)
+        ).isInstanceOf(IncorrectHourOrMinutesBusinessException.class);
+    }
+
+    @ParameterizedTest
+    @MethodSource("com.medic_manager.app.testdata.AppointmentTestdata#provideInvalidMinuteList")
+    void throwsIncorrectHourOrMinutesBusinessExceptionWhenCreateAppointmentWithIncorrectMinute(AppointmentTo appointmentTo) {
+        //given
+        //when
+        //then
+        assertThatThrownBy(
+                () -> appointmentService.createAppointment(appointmentTo)
+        ).isInstanceOf(IncorrectHourOrMinutesBusinessException.class);
+    }
+
+    @Test
+    void throwsEntityNotFoundExceptionWhenCreateAppointmentWithoutPatientFound() {
+        //given
+        AppointmentTo appointmentTo = AppointmentTestdata.mockAppointmentTo();
+        //when
+        when(patientService.getPatientById(ID)).thenThrow(new EntityNotFoundException());
+        //then
+        assertThatThrownBy(
+                () -> appointmentService.createAppointment(appointmentTo)
+        ).isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void throwsEntityNotFoundExceptionWhenCreateAppointmentWithoutDoctorFound() {
+        //given
+        AppointmentTo appointmentTo = AppointmentTestdata.mockAppointmentTo();
+        PatientEntity patientEntity = PatientTestdata.mockPatientEntity(ID, EMAIL);
+        //when
+        when(patientService.getPatientById(ID)).thenReturn(patientEntity);
+        when(doctorService.getDoctorById(ID)).thenThrow(new EntityNotFoundException());
+        //then
+        assertThatThrownBy(
+                () -> appointmentService.createAppointment(appointmentTo)
+        ).isInstanceOf(EntityNotFoundException.class);
+    }
+
+    //TODO - add tests for pure isAppointmentValidToCreate method
 
     @Test
     void returnEmptyListWhenNoAppointmentsFound() {

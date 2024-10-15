@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.TestComponent;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @TestComponent
@@ -60,5 +61,24 @@ public class AppointmentTestdata {
                 Arguments.of(new AppointmentTo(null, APPOINTMENT_DATE, DayOfWeek.SATURDAY, APPOINTMENT_HOUR, APPOINTMENT_MINUTE, AppointmentStatusEnum.PENDING, ID, ID)),
                 Arguments.of(new AppointmentTo(null, APPOINTMENT_DATE, DayOfWeek.SUNDAY, APPOINTMENT_HOUR, APPOINTMENT_MINUTE, AppointmentStatusEnum.PENDING, ID, ID))
         );
+    }
+
+    public static Stream<Arguments> provideInvalidHourList() {
+        return Stream.of(
+                        IntStream.rangeClosed(0, 7).mapToObj(hour -> (byte) hour),
+                        IntStream.rangeClosed(18, 23).mapToObj(hour -> (byte) hour)
+                )
+                .flatMap(stream -> stream)
+                .map(hour -> Arguments.of(new AppointmentTo(null, APPOINTMENT_DATE, DayOfWeek.TUESDAY, hour, APPOINTMENT_MINUTE, AppointmentStatusEnum.PENDING, ID, ID)));
+    }
+
+    public static Stream<Arguments> provideInvalidMinuteList() {
+        return Stream.of(
+                        IntStream.rangeClosed(1, 60)
+                                .mapToObj(minute -> (byte) minute)
+                                .filter(minute -> minute != 15 && minute != 30 && minute != 45)
+                )
+                .flatMap(stream -> stream)
+                .map(minute -> Arguments.of(new AppointmentTo(null, APPOINTMENT_DATE, DayOfWeek.TUESDAY, APPOINTMENT_HOUR, minute, AppointmentStatusEnum.PENDING, ID, ID)));
     }
 }

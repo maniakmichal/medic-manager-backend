@@ -57,6 +57,14 @@ public class AppointmentService {
         return findById(id);
     }
 
+    public void deleteAppointment(Long id) {
+        if (id == null) {
+            logger.severe(getErrorNullPassedAsArgumentToMethod());
+            throw new IllegalArgumentException(getErrorNullPassedAsArgumentToMethod());
+        }
+        appointmentRepo.deleteById(id);
+    }
+
     private AppointmentEntity findById(Long id) {
         if (id == null) {
             logger.severe(getErrorNullPassedAsArgumentToMethod());
@@ -137,8 +145,8 @@ public class AppointmentService {
             DoctorEntity doctorEntity,
             PatientEntity patientEntity
     ) {
-        checkIfDoctorIsBusy(appointmentTo, doctorEntity);
         checkIfPatientIsBusy(appointmentTo, patientEntity);
+        checkIfDoctorIsBusy(appointmentTo, doctorEntity);
     }
 
     private void checkIfDoctorIsBusy(AppointmentTo appointmentTo, DoctorEntity doctorEntity) {

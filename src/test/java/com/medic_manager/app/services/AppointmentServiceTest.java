@@ -4,6 +4,7 @@ import com.medic_manager.app.UnitTestConfig;
 import com.medic_manager.app.entities.AppointmentEntity;
 import com.medic_manager.app.entities.DoctorEntity;
 import com.medic_manager.app.entities.PatientEntity;
+import com.medic_manager.app.exceptions.AppointmentCreationFailedBusinessException;
 import com.medic_manager.app.exceptions.IncorrectDayOfWeekBusinessException;
 import com.medic_manager.app.exceptions.IncorrectHourOrMinutesBusinessException;
 import com.medic_manager.app.repositories.AppointmentRepo;
@@ -20,11 +21,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @UnitTestConfig
 class AppointmentServiceTest {
@@ -137,7 +138,43 @@ class AppointmentServiceTest {
         ).isInstanceOf(EntityNotFoundException.class);
     }
 
-    //TODO - add tests for pure isAppointmentValidToCreate method
+    @Test
+    void throwsAppointmentCreationFailedBusinessExceptionWhenCreateAppointmentWithBusyPatient() {
+        //given
+        AppointmentTo appointmentTo = AppointmentTestdata.mockAppointmentTo();
+        PatientEntity patientEntity = PatientTestdata.mockPatientEntity(ID, EMAIL);
+        DoctorEntity doctorEntity = DoctorTestdata.mockDoctorEntity(ID, EMAIL);
+        AppointmentEntity appointmentEntity = AppointmentTestdata.mockAppointmentEntity();
+        //when
+        when(patientService.getPatientById(ID)).thenReturn(patientEntity);
+        when(doctorService.getDoctorById(ID)).thenReturn(doctorEntity);
+        when(appointmentRepo.findAllByPatientEntityAndAppointmentDate(patientEntity, appointmentTo.appointmentDate()))
+                .thenReturn(List.of(appointmentEntity));
+        //then
+        assertThatThrownBy(
+                () -> appointmentService.createAppointment(appointmentTo)
+        ).isInstanceOf(AppointmentCreationFailedBusinessException.class);
+    }
+
+    @Test
+    void throwsAppointmentCreationFailedBusinessExceptionWhenCreateAppointmentWithBusyDoctor() {
+        //given
+        AppointmentTo appointmentTo = AppointmentTestdata.mockAppointmentTo();
+        PatientEntity patientEntity = PatientTestdata.mockPatientEntity(ID, EMAIL);
+        DoctorEntity doctorEntity = DoctorTestdata.mockDoctorEntity(ID, EMAIL);
+        AppointmentEntity appointmentEntity = AppointmentTestdata.mockAppointmentEntity();
+        //when
+        when(patientService.getPatientById(ID)).thenReturn(patientEntity);
+        when(doctorService.getDoctorById(ID)).thenReturn(doctorEntity);
+        when(appointmentRepo.findAllByPatientEntityAndAppointmentDate(patientEntity, appointmentTo.appointmentDate()))
+                .thenReturn(List.of());
+        when(appointmentRepo.findAllByDoctorEntityAndAppointmentDate(doctorEntity, appointmentTo.appointmentDate()))
+                .thenReturn(List.of(appointmentEntity));
+        //then
+        assertThatThrownBy(
+                () -> appointmentService.createAppointment(appointmentTo)
+        ).isInstanceOf(AppointmentCreationFailedBusinessException.class);
+    }
 
     @Test
     void returnEmptyListWhenNoAppointmentsFound() {
@@ -162,5 +199,56 @@ class AppointmentServiceTest {
                 .isNotEmpty()
                 .hasSize(2)
                 .containsExactlyInAnyOrder(appointmentEntity1, appointmentEntity2);
+    }
+
+    @Test
+    void returnAppointmentById() {
+        //given
+        AppointmentEntity appointmentEntity = AppointmentTestdata.mockAppointmentEntity();
+        //when
+        when(appointmentRepo.findById(appointmentEntity.getId())).thenReturn(Optional.of(appointmentEntity));
+        AppointmentEntity appointmentById = appointmentService.getAppointmentById(appointmentEntity.getId());
+        //then
+        assertThat(appointmentById.getId()).isEqualTo(appointmentEntity.getId());
+    }
+
+    @Test
+    void throwsIllegalArgumentExceptionWhenGetAppointmentByNullId() {
+        //given
+        //when
+        //then
+        assertThatThrownBy(
+                () -> appointmentService.getAppointmentById(null)
+        ).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void throwsEntityNotFoundExceptionWhenGetAppointmentById() {
+        //given
+        //when
+        when(appointmentRepo.findById(ID)).thenReturn(Optional.empty());
+        //then
+        assertThatThrownBy(
+                () -> appointmentService.getAppointmentById(ID)
+        ).isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void deleteAppointment() {
+        //given
+        //when
+        appointmentService.deleteAppointment(ID);
+        //then
+        verify(appointmentRepo, times(1)).deleteById(ID);
+    }
+
+    @Test
+    void throwsIllegalArgumentExceptionWhenDeleteAppointmentByNullId() {
+        //given
+        //when
+        //then
+        assertThatThrownBy(
+                () -> appointmentService.deleteAppointment(null)
+        ).isInstanceOf(IllegalArgumentException.class);
     }
 }

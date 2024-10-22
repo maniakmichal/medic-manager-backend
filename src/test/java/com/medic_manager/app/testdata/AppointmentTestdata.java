@@ -20,8 +20,12 @@ public class AppointmentTestdata {
     private static final String EMAIL = "email@example.com";
 
     public static AppointmentEntity mockAppointmentEntity() {
+        return mockAppointmentEntity(null);
+    }
+
+    public static AppointmentEntity mockAppointmentEntity(Long id) {
         AppointmentEntity appointmentEntity = new AppointmentEntity();
-        appointmentEntity.setId(null);
+        appointmentEntity.setId(id);
         appointmentEntity.setAppointmentDate(APPOINTMENT_DATE);
         appointmentEntity.setAppointmentDayOfWeek(DayOfWeek.TUESDAY);
         appointmentEntity.setAppointmentStatusEnum(AppointmentStatusEnum.PENDING);
@@ -33,8 +37,12 @@ public class AppointmentTestdata {
     }
 
     public static AppointmentTo mockAppointmentTo() {
-        return new AppointmentTo(
-                null,
+        return mockAppointmentTo(null);
+    }
+
+    public static AppointmentTo mockAppointmentTo(Long id) {
+        return mockAppointmentTo(
+                id,
                 APPOINTMENT_DATE,
                 DayOfWeek.TUESDAY,
                 APPOINTMENT_HOUR,
@@ -45,9 +53,32 @@ public class AppointmentTestdata {
         );
     }
 
+    public static AppointmentTo mockAppointmentTo(
+            Long id,
+            LocalDate appointmentDate,
+            DayOfWeek dayOfWeek,
+            byte hour,
+            byte minute,
+            AppointmentStatusEnum appointmentStatusEnum,
+            Long doctorId,
+            Long patientId
+    ) {
+        return new AppointmentTo(
+                id,
+                appointmentDate,
+                dayOfWeek,
+                hour,
+                minute,
+                appointmentStatusEnum,
+                doctorId,
+                patientId
+        );
+    }
+
     public static Stream<Arguments> provideInvalidCreateAppointmentToList() {
         return Stream.of(
                 null,
+                Arguments.of(new AppointmentTo(ID, APPOINTMENT_DATE, DayOfWeek.TUESDAY, APPOINTMENT_HOUR, APPOINTMENT_MINUTE, AppointmentStatusEnum.PENDING, ID, ID)),
                 Arguments.of(new AppointmentTo(null, null, DayOfWeek.TUESDAY, APPOINTMENT_HOUR, APPOINTMENT_MINUTE, AppointmentStatusEnum.PENDING, ID, ID)),
                 Arguments.of(new AppointmentTo(null, APPOINTMENT_DATE, null, APPOINTMENT_HOUR, APPOINTMENT_MINUTE, AppointmentStatusEnum.PENDING, ID, ID)),
                 Arguments.of(new AppointmentTo(null, APPOINTMENT_DATE, DayOfWeek.TUESDAY, APPOINTMENT_HOUR, APPOINTMENT_MINUTE, null, ID, ID)),
@@ -56,10 +87,29 @@ public class AppointmentTestdata {
         );
     }
 
+    public static Stream<Arguments> provideInvalidUpdateAppointmentToList() {
+        return Stream.of(
+                null,
+                Arguments.of(new AppointmentTo(null, APPOINTMENT_DATE, DayOfWeek.TUESDAY, APPOINTMENT_HOUR, APPOINTMENT_MINUTE, AppointmentStatusEnum.PENDING, ID, ID)),
+                Arguments.of(new AppointmentTo(ID, null, DayOfWeek.TUESDAY, APPOINTMENT_HOUR, APPOINTMENT_MINUTE, AppointmentStatusEnum.PENDING, ID, ID)),
+                Arguments.of(new AppointmentTo(ID, APPOINTMENT_DATE, null, APPOINTMENT_HOUR, APPOINTMENT_MINUTE, AppointmentStatusEnum.PENDING, ID, ID)),
+                Arguments.of(new AppointmentTo(ID, APPOINTMENT_DATE, DayOfWeek.TUESDAY, APPOINTMENT_HOUR, APPOINTMENT_MINUTE, null, ID, ID)),
+                Arguments.of(new AppointmentTo(ID, APPOINTMENT_DATE, DayOfWeek.TUESDAY, APPOINTMENT_HOUR, APPOINTMENT_MINUTE, AppointmentStatusEnum.PENDING, null, ID)),
+                Arguments.of(new AppointmentTo(ID, APPOINTMENT_DATE, DayOfWeek.TUESDAY, APPOINTMENT_HOUR, APPOINTMENT_MINUTE, AppointmentStatusEnum.PENDING, ID, null))
+        );
+    }
+
     public static Stream<Arguments> provideInvalidDayOfWeekList() {
         return Stream.of(
                 Arguments.of(new AppointmentTo(null, APPOINTMENT_DATE, DayOfWeek.SATURDAY, APPOINTMENT_HOUR, APPOINTMENT_MINUTE, AppointmentStatusEnum.PENDING, ID, ID)),
                 Arguments.of(new AppointmentTo(null, APPOINTMENT_DATE, DayOfWeek.SUNDAY, APPOINTMENT_HOUR, APPOINTMENT_MINUTE, AppointmentStatusEnum.PENDING, ID, ID))
+        );
+    }
+
+    public static Stream<Arguments> provideInvalidDayOfWeekListForUpdate() {
+        return Stream.of(
+                Arguments.of(new AppointmentTo(ID, APPOINTMENT_DATE, DayOfWeek.SATURDAY, APPOINTMENT_HOUR, APPOINTMENT_MINUTE, AppointmentStatusEnum.PENDING, ID, ID)),
+                Arguments.of(new AppointmentTo(ID, APPOINTMENT_DATE, DayOfWeek.SUNDAY, APPOINTMENT_HOUR, APPOINTMENT_MINUTE, AppointmentStatusEnum.PENDING, ID, ID))
         );
     }
 
@@ -72,6 +122,15 @@ public class AppointmentTestdata {
                 .map(hour -> Arguments.of(new AppointmentTo(null, APPOINTMENT_DATE, DayOfWeek.TUESDAY, hour, APPOINTMENT_MINUTE, AppointmentStatusEnum.PENDING, ID, ID)));
     }
 
+    public static Stream<Arguments> provideInvalidHourListForUpdate() {
+        return Stream.of(
+                        IntStream.rangeClosed(0, 7).mapToObj(hour -> (byte) hour),
+                        IntStream.rangeClosed(18, 23).mapToObj(hour -> (byte) hour)
+                )
+                .flatMap(stream -> stream)
+                .map(hour -> Arguments.of(new AppointmentTo(ID, APPOINTMENT_DATE, DayOfWeek.TUESDAY, hour, APPOINTMENT_MINUTE, AppointmentStatusEnum.PENDING, ID, ID)));
+    }
+
     public static Stream<Arguments> provideInvalidMinuteList() {
         return Stream.of(
                         IntStream.rangeClosed(1, 60)
@@ -80,5 +139,15 @@ public class AppointmentTestdata {
                 )
                 .flatMap(stream -> stream)
                 .map(minute -> Arguments.of(new AppointmentTo(null, APPOINTMENT_DATE, DayOfWeek.TUESDAY, APPOINTMENT_HOUR, minute, AppointmentStatusEnum.PENDING, ID, ID)));
+    }
+
+    public static Stream<Arguments> provideInvalidMinuteListForUpdate() {
+        return Stream.of(
+                        IntStream.rangeClosed(1, 60)
+                                .mapToObj(minute -> (byte) minute)
+                                .filter(minute -> minute != 15 && minute != 30 && minute != 45)
+                )
+                .flatMap(stream -> stream)
+                .map(minute -> Arguments.of(new AppointmentTo(ID, APPOINTMENT_DATE, DayOfWeek.TUESDAY, APPOINTMENT_HOUR, minute, AppointmentStatusEnum.PENDING, ID, ID)));
     }
 }

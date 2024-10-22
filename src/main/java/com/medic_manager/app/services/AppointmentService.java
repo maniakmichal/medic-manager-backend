@@ -57,6 +57,24 @@ public class AppointmentService {
         return findById(id);
     }
 
+    public AppointmentEntity updateAppointment(AppointmentTo appointmentTo) {
+        validateUpdateTo(appointmentTo);
+        isValidDayOfWeek(appointmentTo.appointmentDayOfWeek());
+        isValidHourAndMinutes(appointmentTo.appointmentHour(), appointmentTo.appointmentMinute());
+        PatientEntity persistedPatient = patientService.getPatientById(appointmentTo.patientId());
+        DoctorEntity persistedDoctor = doctorService.getDoctorById(appointmentTo.doctorId());
+        isAppointmentValidToCreate(appointmentTo, persistedDoctor, persistedPatient);
+        AppointmentEntity persistedAppointment = findById(appointmentTo.id());
+        logger.info(() -> getUpdateEntity(AppointmentEntity.class, appointmentTo));
+        AppointmentEntity appointmentEntity = updateAppointmentEntity(
+                persistedAppointment,
+                appointmentTo,
+                persistedDoctor,
+                persistedPatient
+        );
+        return appointmentRepo.save(appointmentEntity);
+    }
+
     public void deleteAppointment(Long id) {
         if (id == null) {
             logger.severe(getErrorNullPassedAsArgumentToMethod());
@@ -95,8 +113,33 @@ public class AppointmentService {
         return appointmentEntity;
     }
 
+    private AppointmentEntity updateAppointmentEntity(
+            AppointmentEntity persistedAppointment,
+            AppointmentTo appointmentTo,
+            DoctorEntity persistedDoctor,
+            PatientEntity persistedPatient
+    ) {
+        persistedAppointment.setAppointmentDate(appointmentTo.appointmentDate());
+        persistedAppointment.setAppointmentHour(appointmentTo.appointmentHour());
+        persistedAppointment.setAppointmentMinute(appointmentTo.appointmentMinute());
+        persistedAppointment.setAppointmentDayOfWeek(appointmentTo.appointmentDayOfWeek());
+        persistedAppointment.setAppointmentStatusEnum(appointmentTo.appointmentStatusEnum());
+        persistedAppointment.setDoctorEntity(persistedDoctor);
+        persistedAppointment.setPatientEntity(persistedPatient);
+        //TODO - check if persisted appointment is deleted from list or not in Patient Entity
+//        persistedPatient.getAppointmentEntityList().remove(persistedAppointment);
+        return persistedAppointment;
+    }
+
     private void validateCreateTo(AppointmentTo appointmentTo) throws IllegalArgumentException {
         if (isToInvalid(appointmentTo) || appointmentTo.id() != null) {
+            logger.severe(getErrorNullOrIncorrectTOPassedAsArgumentToMethod());
+            throw new IllegalArgumentException(getErrorNullOrIncorrectTOPassedAsArgumentToMethod());
+        }
+    }
+
+    private void validateUpdateTo(AppointmentTo appointmentTo) throws IllegalArgumentException {
+        if (isToInvalid(appointmentTo) || appointmentTo.id() == null) {
             logger.severe(getErrorNullOrIncorrectTOPassedAsArgumentToMethod());
             throw new IllegalArgumentException(getErrorNullOrIncorrectTOPassedAsArgumentToMethod());
         }

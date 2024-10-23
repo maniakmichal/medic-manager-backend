@@ -1,8 +1,6 @@
 package com.medic_manager.app.services;
 
-import com.medic_manager.app.common.LoggerTextUtil;
 import com.medic_manager.app.entities.DoctorEntity;
-import com.medic_manager.app.enums.SpecializationEnum;
 import com.medic_manager.app.repositories.DoctorRepo;
 import com.medic_manager.app.tos.DoctorTo;
 import jakarta.persistence.EntityExistsException;
@@ -42,27 +40,13 @@ public class DoctorService {
 
     public DoctorEntity getDoctorById(Long id) {
         logger.info(() -> getGetEntityById(DoctorEntity.class, id));
-        if (id == null) {
-            logger.severe(LoggerTextUtil::getErrorNullPassedAsArgumentToMethod);
-            throw new IllegalArgumentException(getErrorNullPassedAsArgumentToMethod());
-        }
-        return doctorRepo.findById(id)
-                .orElseThrow(
-                        () -> {
-                            logger.severe(getErrorEntityWithIdNotFound(DoctorEntity.class, id));
-                            return new EntityNotFoundException(getErrorEntityWithIdNotFound(DoctorEntity.class, id));
-                        }
-                );
+        return findById(id);
     }
 
     public DoctorEntity updateDoctor(DoctorTo doctorTo) {
         validateUpdateTo(doctorTo);
         checkIfEntityAlreadyExist(doctorTo.email());
-        DoctorEntity persistedDoctor = doctorRepo.findById(doctorTo.id())
-                .orElseThrow(() -> {
-                    logger.severe(getErrorEntityWithIdNotFound(DoctorEntity.class, doctorTo.id()));
-                    return new EntityNotFoundException(getErrorEntityWithIdNotFound(DoctorEntity.class, doctorTo.id()));
-                });
+        DoctorEntity persistedDoctor = findById(doctorTo.id());
         logger.info(() -> getUpdateEntity(DoctorEntity.class, doctorTo));
         DoctorEntity doctorEntity = updateDoctorEntity(persistedDoctor, doctorTo);
         return doctorRepo.save(doctorEntity);
@@ -75,6 +59,20 @@ public class DoctorService {
         }
         logger.info(() -> getDeleteEntityById(DoctorEntity.class, id));
         doctorRepo.deleteById(id);
+    }
+
+    private DoctorEntity findById(Long id) {
+        if (id == null) {
+            logger.severe(getErrorNullPassedAsArgumentToMethod());
+            throw new IllegalArgumentException(getErrorNullPassedAsArgumentToMethod());
+        }
+        return doctorRepo.findById(id)
+                .orElseThrow(
+                        () -> {
+                            logger.severe(getErrorEntityWithIdNotFound(DoctorEntity.class, id));
+                            return new EntityNotFoundException(getErrorEntityWithIdNotFound(DoctorEntity.class, id));
+                        }
+                );
     }
 
     private DoctorEntity generateDoctor(DoctorTo doctorTo) {
@@ -119,24 +117,15 @@ public class DoctorService {
     }
 
     private boolean isToInvalid(DoctorTo doctorTo) {
-        logger.info(LoggerTextUtil::getCheckingIfToInvalid);
-        if (
-                doctorTo == null
-                        || doctorTo.name() == null
-                        || doctorTo.surname() == null
-                        || doctorTo.email() == null
-                        || isListOfEnumsNull(doctorTo.specializationEnums())
-        ) {
-            return true;
-        } else {
-            return doctorTo.name().isEmpty()
-                    || doctorTo.surname().isEmpty()
-                    || doctorTo.email().isEmpty()
-                    || doctorTo.specializationEnums().isEmpty();
-        }
-    }
-
-    private boolean isListOfEnumsNull(List<SpecializationEnum> list) {
-        return list == null;
+        logger.info(getCheckingIfToInvalid());
+        return doctorTo == null
+                || doctorTo.name() == null
+                || doctorTo.surname() == null
+                || doctorTo.email() == null
+                || doctorTo.specializationEnums() == null
+                || doctorTo.name().isBlank()
+                || doctorTo.surname().isBlank()
+                || doctorTo.email().isBlank()
+                || doctorTo.specializationEnums().isEmpty();
     }
 }

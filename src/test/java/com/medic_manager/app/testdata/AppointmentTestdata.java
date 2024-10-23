@@ -1,6 +1,8 @@
 package com.medic_manager.app.testdata;
 
 import com.medic_manager.app.entities.AppointmentEntity;
+import com.medic_manager.app.entities.DoctorEntity;
+import com.medic_manager.app.entities.PatientEntity;
 import com.medic_manager.app.enums.AppointmentStatusEnum;
 import com.medic_manager.app.tos.AppointmentTo;
 import org.junit.jupiter.params.provider.Arguments;
@@ -24,6 +26,10 @@ public class AppointmentTestdata {
     }
 
     public static AppointmentEntity mockAppointmentEntity(Long id) {
+        return mockAppointmentEntity(id, DoctorTestdata.mockDoctorEntity(ID, EMAIL), PatientTestdata.mockPatientEntity(ID, EMAIL));
+    }
+
+    public static AppointmentEntity mockAppointmentEntity(Long id, DoctorEntity doctorEntity, PatientEntity patientEntity) {
         AppointmentEntity appointmentEntity = new AppointmentEntity();
         appointmentEntity.setId(id);
         appointmentEntity.setAppointmentDate(APPOINTMENT_DATE);
@@ -31,8 +37,8 @@ public class AppointmentTestdata {
         appointmentEntity.setAppointmentStatusEnum(AppointmentStatusEnum.PENDING);
         appointmentEntity.setAppointmentHour(APPOINTMENT_HOUR);
         appointmentEntity.setAppointmentMinute(APPOINTMENT_MINUTE);
-        appointmentEntity.setDoctorEntity(DoctorTestdata.mockDoctorEntity(ID, EMAIL));
-        appointmentEntity.setPatientEntity(PatientTestdata.mockPatientEntity(ID, EMAIL));
+        appointmentEntity.setDoctorEntity(doctorEntity);
+        appointmentEntity.setPatientEntity(patientEntity);
         return appointmentEntity;
     }
 

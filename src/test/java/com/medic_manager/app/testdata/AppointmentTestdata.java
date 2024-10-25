@@ -47,6 +47,10 @@ public class AppointmentTestdata {
     }
 
     public static AppointmentTo mockAppointmentTo(Long id) {
+        return mockAppointmentTo(id, ID, ID);
+    }
+
+    public static AppointmentTo mockAppointmentTo(Long id, Long doctorId, Long patientId) {
         return mockAppointmentTo(
                 id,
                 APPOINTMENT_DATE,
@@ -54,8 +58,8 @@ public class AppointmentTestdata {
                 APPOINTMENT_HOUR,
                 APPOINTMENT_MINUTE,
                 AppointmentStatusEnum.PENDING,
-                ID,
-                ID
+                doctorId,
+                patientId
         );
     }
 

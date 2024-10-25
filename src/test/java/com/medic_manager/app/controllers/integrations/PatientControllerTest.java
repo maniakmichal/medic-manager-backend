@@ -34,11 +34,11 @@ class PatientControllerTest {
     private static final String EMAIL_1 = "email1@example.com";
     private static final String EMAIL_2 = "email2@example.com";
     @Autowired
-    TestRestTemplate restTemplate;
+    private TestRestTemplate restTemplate;
     @Autowired
-    PatientRepo patientRepo;
+    private PatientRepo patientRepo;
     @Autowired
-    PatientMapper patientMapper;
+    private PatientMapper patientMapper;
 
     @AfterEach
     void cleanup() {

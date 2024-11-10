@@ -20,6 +20,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 
 import java.util.List;
@@ -101,38 +102,8 @@ class AppointmentControllerTest {
         }
 
         @ParameterizedTest
-        @MethodSource("com.medic_manager.app.testdata.AppointmentTestdata#provideInvalidDayOfWeekList")
-        void returnForbiddenWhenCreateAppointmentWithIncorrectDay(AppointmentTo appointmentTo) {
-            //given
-            HttpEntity<AppointmentTo> request = createRequestBody(appointmentTo);
-            //when
-            ResponseEntity<ErrorResponseUtil> response = restTemplate.postForEntity(CREATE_URL, request, ErrorResponseUtil.class);
-            //then
-            ErrorResponseUtil responseBody = response.getBody();
-            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-            assertThat(responseBody).isNotNull();
-            List<AppointmentEntity> appointments = appointmentRepo.findAll();
-            assertThat(appointments).isEmpty();
-        }
-
-        @ParameterizedTest
-        @MethodSource("com.medic_manager.app.testdata.AppointmentTestdata#provideInvalidHourList")
-        void returnForbiddenWhenCreateAppointmentWithIncorrectHour(AppointmentTo appointmentTo) {
-            //given
-            HttpEntity<AppointmentTo> request = createRequestBody(appointmentTo);
-            //when
-            ResponseEntity<ErrorResponseUtil> response = restTemplate.postForEntity(CREATE_URL, request, ErrorResponseUtil.class);
-            //then
-            ErrorResponseUtil responseBody = response.getBody();
-            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-            assertThat(responseBody).isNotNull();
-            List<AppointmentEntity> appointments = appointmentRepo.findAll();
-            assertThat(appointments).isEmpty();
-        }
-
-        @ParameterizedTest
-        @MethodSource("com.medic_manager.app.testdata.AppointmentTestdata#provideInvalidMinuteList")
-        void returnForbiddenWhenCreateAppointmentWithIncorrectMinute(AppointmentTo appointmentTo) {
+        @MethodSource("com.medic_manager.app.testdata.AppointmentTestdata#provideInvalidBusinessDataForCreate")
+        void returnForbiddenWhenCreateAppointmentWithIncorrectBusinessData(AppointmentTo appointmentTo) {
             //given
             HttpEntity<AppointmentTo> request = createRequestBody(appointmentTo);
             //when
@@ -225,4 +196,57 @@ class AppointmentControllerTest {
             assertThat(appointments).hasSize(1);
         }
     }
+
+    @Nested
+    class getsAllAppointments {
+        @Test
+        void getAllAppointments() {
+            //given
+            PatientEntity patient1 = PatientTestdata.mockPatientEntity(EMAIL);
+            PatientEntity savedPatient1 = patientRepo.save(patient1);
+            DoctorEntity doctor1 = DoctorTestdata.mockDoctorEntity(EMAIL);
+            DoctorEntity savedDoctor1 = doctorRepo.save(doctor1);
+            PatientEntity patient2 = PatientTestdata.mockPatientEntity(EMAIL2);
+            PatientEntity savedPatient2 = patientRepo.save(patient2);
+            DoctorEntity doctor2 = DoctorTestdata.mockDoctorEntity(EMAIL2);
+            DoctorEntity savedDoctor2 = doctorRepo.save(doctor2);
+            AppointmentEntity appointment1 = AppointmentTestdata.mockAppointmentEntity(null, savedDoctor1, savedPatient1);
+            AppointmentEntity appointment2 = AppointmentTestdata.mockAppointmentEntity(null, savedDoctor2, savedPatient2);
+            appointmentRepo.saveAll(List.of(appointment1, appointment2));
+            //when
+            ResponseEntity<List<AppointmentTo>> response = restTemplate.exchange(
+                    GET_ALL_URL,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<>() {
+                    }
+            );
+            //then
+            List<AppointmentTo> appointments = response.getBody();
+            AppointmentTo expectedAppointment1 = appointmentMapper.toAppointmentTo(appointment1);
+            AppointmentTo expectedAppointment2 = appointmentMapper.toAppointmentTo(appointment2);
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(appointments).hasSize(2);
+            assertThat(appointments).usingRecursiveFieldByFieldElementComparator().containsExactlyInAnyOrder(expectedAppointment1, expectedAppointment2);
+        }
+
+        @Test
+        void returnEmptyListWhenNoAppointmentsFound() {
+            //given
+            //when
+            ResponseEntity<List<AppointmentTo>> response = restTemplate.exchange(
+                    GET_ALL_URL,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<>() {
+                    }
+            );
+            //then
+            List<AppointmentTo> appointments = response.getBody();
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(appointments).isEmpty();
+        }
+    }
+
+    //TODO: add next tests for methods getbyID, update etc.
 }

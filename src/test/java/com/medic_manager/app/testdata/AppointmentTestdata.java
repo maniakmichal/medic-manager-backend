@@ -160,4 +160,12 @@ public class AppointmentTestdata {
                 .flatMap(stream -> stream)
                 .map(minute -> Arguments.of(new AppointmentTo(ID, APPOINTMENT_DATE, DayOfWeek.TUESDAY, APPOINTMENT_HOUR, minute, AppointmentStatusEnum.PENDING, ID, ID)));
     }
+
+    public static Stream<Arguments> provideInvalidBusinessDataForCreate() {
+        return Stream.of(
+                provideInvalidHourList(),
+                provideInvalidDayOfWeekList(),
+                provideInvalidMinuteList()
+        ).flatMap(stream -> stream);
+    }
 }

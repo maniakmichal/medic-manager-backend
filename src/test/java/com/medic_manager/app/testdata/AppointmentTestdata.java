@@ -168,4 +168,12 @@ public class AppointmentTestdata {
                 provideInvalidMinuteList()
         ).flatMap(stream -> stream);
     }
+
+    public static Stream<Arguments> provideInvalidBusinessDataForUpdate() {
+        return Stream.of(
+                provideInvalidHourListForUpdate(),
+                provideInvalidDayOfWeekListForUpdate(),
+                provideInvalidMinuteListForUpdate()
+        ).flatMap(stream -> stream);
+    }
 }

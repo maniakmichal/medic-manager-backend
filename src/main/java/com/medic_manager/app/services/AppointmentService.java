@@ -61,17 +61,11 @@ public class AppointmentService {
         validateUpdateTo(appointmentTo);
         isValidDayOfWeek(appointmentTo.appointmentDayOfWeek());
         isValidHourAndMinutes(appointmentTo.appointmentHour(), appointmentTo.appointmentMinute());
-        PatientEntity persistedPatient = patientService.getPatientById(appointmentTo.patientId());
-        DoctorEntity persistedDoctor = doctorService.getDoctorById(appointmentTo.doctorId());
-        isAppointmentValidToCreate(appointmentTo, persistedDoctor, persistedPatient);
-        AppointmentEntity persistedAppointment = findById(appointmentTo.id());
         logger.info(() -> getUpdateEntity(AppointmentEntity.class, appointmentTo));
-        AppointmentEntity appointmentEntity = updateAppointmentEntity(
-                persistedAppointment,
-                appointmentTo,
-                persistedDoctor,
-                persistedPatient
-        );
+        AppointmentEntity persistedAppointment = findById(appointmentTo.id());
+        isSetPatientToUpdate(appointmentTo, persistedAppointment);
+        isSetDoctorToUpdate(appointmentTo, persistedAppointment);
+        AppointmentEntity appointmentEntity = updateAppointmentEntity(persistedAppointment, appointmentTo);
         return appointmentRepo.save(appointmentEntity);
     }
 
@@ -115,19 +109,13 @@ public class AppointmentService {
 
     private AppointmentEntity updateAppointmentEntity(
             AppointmentEntity persistedAppointment,
-            AppointmentTo appointmentTo,
-            DoctorEntity persistedDoctor,
-            PatientEntity persistedPatient
+            AppointmentTo appointmentTo
     ) {
         persistedAppointment.setAppointmentDate(appointmentTo.appointmentDate());
         persistedAppointment.setAppointmentHour(appointmentTo.appointmentHour());
         persistedAppointment.setAppointmentMinute(appointmentTo.appointmentMinute());
         persistedAppointment.setAppointmentDayOfWeek(appointmentTo.appointmentDayOfWeek());
         persistedAppointment.setAppointmentStatusEnum(appointmentTo.appointmentStatusEnum());
-        persistedAppointment.setDoctorEntity(persistedDoctor);
-        persistedAppointment.setPatientEntity(persistedPatient);
-        //TODO - check if persisted appointment is deleted from list or not in Patient Entity
-//        persistedPatient.getAppointmentEntityList().remove(persistedAppointment);
         return persistedAppointment;
     }
 
@@ -190,6 +178,33 @@ public class AppointmentService {
     ) {
         checkIfPatientIsBusy(appointmentTo, patientEntity);
         checkIfDoctorIsBusy(appointmentTo, doctorEntity);
+    }
+
+    private void isSetPatientToUpdate(
+            AppointmentTo appointmentTo,
+            AppointmentEntity persistedAppointment
+    ) {
+        boolean isPatientChanged = !persistedAppointment.getPatientEntity().getId().equals(appointmentTo.patientId());
+        if (isPatientChanged) {
+            PatientEntity oldPatient = patientService.getPatientByIdWithAppointments(persistedAppointment.getPatientEntity().getId());
+            oldPatient.getAppointmentEntityList().remove(persistedAppointment);
+            patientService.savePatient(oldPatient);
+            PatientEntity persistedPatient = patientService.getPatientByIdWithAppointments(appointmentTo.patientId());
+            checkIfPatientIsBusy(appointmentTo, persistedPatient);
+            persistedAppointment.setPatientEntity(persistedPatient);
+        }
+    }
+
+    private void isSetDoctorToUpdate(
+            AppointmentTo appointmentTo,
+            AppointmentEntity persistedAppointment
+    ) {
+        boolean isDoctorChanged = !persistedAppointment.getDoctorEntity().getId().equals(appointmentTo.doctorId());
+        if (isDoctorChanged) {
+            DoctorEntity persistedDoctor = doctorService.getDoctorById(appointmentTo.doctorId());
+            checkIfDoctorIsBusy(appointmentTo, persistedDoctor);
+            persistedAppointment.setDoctorEntity(persistedDoctor);
+        }
     }
 
     private void checkIfDoctorIsBusy(AppointmentTo appointmentTo, DoctorEntity doctorEntity) {

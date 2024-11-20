@@ -61,6 +61,24 @@ public class PatientService {
         patientRepo.deleteById(id);
     }
 
+    public void savePatient(PatientEntity patientEntity) {
+        patientRepo.save(patientEntity);
+    }
+
+    public PatientEntity getPatientByIdWithAppointments(Long id) {
+        if (id == null) {
+            logger.severe(getErrorNullPassedAsArgumentToMethod());
+            throw new IllegalArgumentException(getErrorNullPassedAsArgumentToMethod());
+        }
+        return patientRepo.findByIdWithAppointments(id)
+                .orElseThrow(
+                        () -> {
+                            logger.severe(getErrorEntityWithIdNotFound(PatientEntity.class, id));
+                            return new EntityNotFoundException(getErrorEntityWithIdNotFound(PatientEntity.class, id));
+                        }
+                );
+    }
+
     private PatientEntity findById(Long id) {
         if (id == null) {
             logger.severe(getErrorNullPassedAsArgumentToMethod());

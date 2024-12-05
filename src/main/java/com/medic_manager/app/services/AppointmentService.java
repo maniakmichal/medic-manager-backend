@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -39,7 +40,7 @@ public class AppointmentService {
         validateCreateTo(appointmentTo);
         isValidDayOfWeek(appointmentTo.appointmentDayOfWeek());
         isValidHourAndMinutes(appointmentTo.appointmentHour(), appointmentTo.appointmentMinute());
-        PatientEntity patientEntity = patientService.getPatientById(appointmentTo.patientId());
+        PatientEntity patientEntity = patientService.getPatientByIdWithAppointments(appointmentTo.patientId());
         DoctorEntity doctorEntity = doctorService.getDoctorById(appointmentTo.doctorId());
         isAppointmentValidToCreate(appointmentTo, doctorEntity, patientEntity);
         logger.info(() -> getCreateNewEntity(AppointmentEntity.class, appointmentTo));
@@ -104,6 +105,13 @@ public class AppointmentService {
         appointmentEntity.setAppointmentStatusEnum(appointmentTo.appointmentStatusEnum());
         appointmentEntity.setDoctorEntity(doctorEntity);
         appointmentEntity.setPatientEntity(patientEntity);
+        if (patientEntity.getAppointmentEntityList() == null || patientEntity.getAppointmentEntityList().isEmpty()) {
+            List<AppointmentEntity> appointmentEntityList = new ArrayList<>();
+            appointmentEntityList.add(appointmentEntity);
+            patientEntity.setAppointmentEntityList(appointmentEntityList);
+        } else {
+            patientEntity.getAppointmentEntityList().add(appointmentEntity);
+        }
         return appointmentEntity;
     }
 

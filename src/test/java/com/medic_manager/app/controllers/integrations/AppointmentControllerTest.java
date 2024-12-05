@@ -657,4 +657,37 @@ class AppointmentControllerTest {
             assertThat(allAppointments).hasSize(1);
         }
     }
+
+    @Nested
+    class patientAndAppointmentCascadeTest {
+        @Test
+        void deleteAppointmentByCascadeWhenDeletePatient() {
+            //given
+            PatientEntity patient = PatientTestdata.mockPatientEntity(EMAIL);
+            PatientEntity savedPatient = patientRepo.save(patient);
+            DoctorEntity doctor = DoctorTestdata.mockDoctorEntity(EMAIL);
+            DoctorEntity savedDoctor = doctorRepo.save(doctor);
+            AppointmentEntity appointmentEntity = AppointmentTestdata.mockAppointmentEntity(null, savedDoctor, savedPatient);
+            AppointmentEntity savedAppointment = appointmentRepo.save(appointmentEntity);
+            //then
+            assertThat(savedAppointment).isNotNull();
+            Optional<PatientEntity> patientEntity = patientRepo.findByIdWithAppointments(savedPatient.getId());
+            assertThat(patientEntity).isPresent();
+            assertThat(patientEntity.get().getAppointmentEntityList()).hasSize(1);
+            assertThat(patientEntity.get().getAppointmentEntityList().get(0))
+                    .isNotNull()
+                    .usingRecursiveComparison()
+                    .ignoringFields("patientEntity", "doctorEntity", "createdAt", "modifiedAt")
+                    .isEqualTo(savedAppointment);
+            //when
+            patientRepo.deleteById(savedPatient.getId());
+            //then
+            List<PatientEntity> patients = patientRepo.findAll();
+            assertThat(patients).isEmpty();
+            List<AppointmentEntity> appointments = appointmentRepo.findAll();
+            assertThat(appointments).isEmpty();
+            List<DoctorEntity> doctors = doctorRepo.findAll();
+            assertThat(doctors).hasSize(1);
+        }
+    }
 }

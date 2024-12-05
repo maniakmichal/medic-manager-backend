@@ -334,5 +334,4 @@ class PatientControllerTest {
             assertThat(notDeletedPatient).isPresent();
         }
     }
-    //TODO: check the delete cascade in the patient controller tests by adding proper tests with appointment
 }

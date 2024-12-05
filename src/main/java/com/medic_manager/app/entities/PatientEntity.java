@@ -17,7 +17,6 @@ public class PatientEntity extends UserEntity {
     @Enumerated(EnumType.STRING)
     private GenderEnum genderEnum;
 
-    //TODO: add tests of the CASCADE!
     @OneToMany(mappedBy = "patientEntity", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     private List<AppointmentEntity> appointmentEntityList;
 

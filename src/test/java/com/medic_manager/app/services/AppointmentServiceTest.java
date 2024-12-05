@@ -35,7 +35,7 @@ import static org.mockito.Mockito.*;
 class AppointmentServiceTest {
 
     private static final Long ID = 1L;
-    private static final Long ID_2 = 2L;
+    private static final Long ID2 = 2L;
     private static final String EMAIL = "email@example.com";
     private final ArgumentCaptor<AppointmentEntity> captor = ArgumentCaptor.forClass(AppointmentEntity.class);
     @Mock
@@ -54,7 +54,7 @@ class AppointmentServiceTest {
         PatientEntity patientEntity = PatientTestdata.mockPatientEntity(ID, EMAIL);
         DoctorEntity doctorEntity = DoctorTestdata.mockDoctorEntity(ID, EMAIL);
         //when
-        when(patientService.getPatientById(ID)).thenReturn(patientEntity);
+        when(patientService.getPatientByIdWithAppointments(ID)).thenReturn(patientEntity);
         when(doctorService.getDoctorById(ID)).thenReturn(doctorEntity);
         when(appointmentRepo.findAllByPatientEntityAndAppointmentDate(patientEntity, appointmentTo.appointmentDate()))
                 .thenReturn(List.of());
@@ -122,7 +122,7 @@ class AppointmentServiceTest {
         //given
         AppointmentTo appointmentTo = AppointmentTestdata.mockAppointmentTo();
         //when
-        when(patientService.getPatientById(ID)).thenThrow(new EntityNotFoundException());
+        when(patientService.getPatientByIdWithAppointments(ID)).thenThrow(new EntityNotFoundException());
         //then
         assertThatThrownBy(
                 () -> appointmentService.createAppointment(appointmentTo)
@@ -135,7 +135,7 @@ class AppointmentServiceTest {
         AppointmentTo appointmentTo = AppointmentTestdata.mockAppointmentTo();
         PatientEntity patientEntity = PatientTestdata.mockPatientEntity(ID, EMAIL);
         //when
-        when(patientService.getPatientById(ID)).thenReturn(patientEntity);
+        when(patientService.getPatientByIdWithAppointments(ID)).thenReturn(patientEntity);
         when(doctorService.getDoctorById(ID)).thenThrow(new EntityNotFoundException());
         //then
         assertThatThrownBy(
@@ -151,7 +151,7 @@ class AppointmentServiceTest {
         DoctorEntity doctorEntity = DoctorTestdata.mockDoctorEntity(ID, EMAIL);
         AppointmentEntity appointmentEntity = AppointmentTestdata.mockAppointmentEntity();
         //when
-        when(patientService.getPatientById(ID)).thenReturn(patientEntity);
+        when(patientService.getPatientByIdWithAppointments(ID)).thenReturn(patientEntity);
         when(doctorService.getDoctorById(ID)).thenReturn(doctorEntity);
         when(appointmentRepo.findAllByPatientEntityAndAppointmentDate(patientEntity, appointmentTo.appointmentDate()))
                 .thenReturn(List.of(appointmentEntity));
@@ -169,7 +169,7 @@ class AppointmentServiceTest {
         DoctorEntity doctorEntity = DoctorTestdata.mockDoctorEntity(ID, EMAIL);
         AppointmentEntity appointmentEntity = AppointmentTestdata.mockAppointmentEntity();
         //when
-        when(patientService.getPatientById(ID)).thenReturn(patientEntity);
+        when(patientService.getPatientByIdWithAppointments(ID)).thenReturn(patientEntity);
         when(doctorService.getDoctorById(ID)).thenReturn(doctorEntity);
         when(appointmentRepo.findAllByPatientEntityAndAppointmentDate(patientEntity, appointmentTo.appointmentDate()))
                 .thenReturn(List.of());
@@ -316,14 +316,14 @@ class AppointmentServiceTest {
         //given
         PatientEntity oldPatient = PatientTestdata.mockPatientEntity(ID, EMAIL);
         AppointmentEntity appointmentEntity = AppointmentTestdata.mockAppointmentEntity(ID);
-        AppointmentTo appointmentTo = AppointmentTestdata.mockAppointmentTo(ID, ID, ID_2);
+        AppointmentTo appointmentTo = AppointmentTestdata.mockAppointmentTo(ID, ID, ID2);
         List<AppointmentEntity> appointmentEntityList = new ArrayList<>();
         appointmentEntityList.add(appointmentEntity);
         oldPatient.setAppointmentEntityList(appointmentEntityList);
         //when
         when(appointmentRepo.findById(ID)).thenReturn(Optional.of(appointmentEntity));
         when(patientService.getPatientByIdWithAppointments(ID)).thenReturn(oldPatient);
-        when(patientService.getPatientByIdWithAppointments(ID_2)).thenThrow(new EntityNotFoundException());
+        when(patientService.getPatientByIdWithAppointments(ID2)).thenThrow(new EntityNotFoundException());
         //then
         assertThatThrownBy(
                 () -> appointmentService.updateAppointment(appointmentTo)
@@ -334,10 +334,10 @@ class AppointmentServiceTest {
     void throwsEntityNotFoundExceptionWhenUpdateAppointmentWithoutDoctorFound() {
         //given
         AppointmentEntity appointmentEntity = AppointmentTestdata.mockAppointmentEntity(ID);
-        AppointmentTo appointmentTo = AppointmentTestdata.mockAppointmentTo(ID, ID_2, ID);
+        AppointmentTo appointmentTo = AppointmentTestdata.mockAppointmentTo(ID, ID2, ID);
         //when
         when(appointmentRepo.findById(ID)).thenReturn(Optional.of(appointmentEntity));
-        when(doctorService.getDoctorById(ID_2)).thenThrow(new EntityNotFoundException());
+        when(doctorService.getDoctorById(ID2)).thenThrow(new EntityNotFoundException());
         //then
         assertThatThrownBy(
                 () -> appointmentService.updateAppointment(appointmentTo)
@@ -348,17 +348,17 @@ class AppointmentServiceTest {
     void throwsAppointmentCreationFailedBusinessExceptionWhenUpdateAppointmentWithBusyPatient() {
         //given
         PatientEntity oldPatient = PatientTestdata.mockPatientEntity(ID, EMAIL);
-        PatientEntity newPatient = PatientTestdata.mockPatientEntity(ID_2, EMAIL);
+        PatientEntity newPatient = PatientTestdata.mockPatientEntity(ID2, EMAIL);
         DoctorEntity doctorEntity = DoctorTestdata.mockDoctorEntity(ID, EMAIL);
         AppointmentEntity appointmentEntity = AppointmentTestdata.mockAppointmentEntity(ID, doctorEntity, oldPatient);
         List<AppointmentEntity> appointmentEntityList = new ArrayList<>();
         appointmentEntityList.add(appointmentEntity);
         oldPatient.setAppointmentEntityList(appointmentEntityList);
-        AppointmentTo appointmentTo = AppointmentTestdata.mockAppointmentTo(ID, ID, ID_2);
+        AppointmentTo appointmentTo = AppointmentTestdata.mockAppointmentTo(ID, ID, ID2);
         //when
         when(appointmentRepo.findById(ID)).thenReturn(Optional.of(appointmentEntity));
         when(patientService.getPatientByIdWithAppointments(ID)).thenReturn(oldPatient);
-        when(patientService.getPatientByIdWithAppointments(ID_2)).thenReturn(newPatient);
+        when(patientService.getPatientByIdWithAppointments(ID2)).thenReturn(newPatient);
         when(appointmentRepo.findAllByPatientEntityAndAppointmentDate(newPatient, appointmentTo.appointmentDate()))
                 .thenReturn(List.of(appointmentEntity));
         //then
@@ -370,12 +370,12 @@ class AppointmentServiceTest {
     @Test
     void throwsAppointmentCreationFailedBusinessExceptionWhenUpdateAppointmentWithBusyDoctor() {
         //given
-        DoctorEntity doctorEntity = DoctorTestdata.mockDoctorEntity(ID_2, EMAIL);
+        DoctorEntity doctorEntity = DoctorTestdata.mockDoctorEntity(ID2, EMAIL);
         AppointmentEntity appointmentEntity = AppointmentTestdata.mockAppointmentEntity(ID);
-        AppointmentTo appointmentTo = AppointmentTestdata.mockAppointmentTo(ID, ID_2, ID);
+        AppointmentTo appointmentTo = AppointmentTestdata.mockAppointmentTo(ID, ID2, ID);
         //when
         when(appointmentRepo.findById(ID)).thenReturn(Optional.of(appointmentEntity));
-        when(doctorService.getDoctorById(ID_2)).thenReturn(doctorEntity);
+        when(doctorService.getDoctorById(ID2)).thenReturn(doctorEntity);
         when(appointmentRepo.findAllByDoctorEntityAndAppointmentDate(doctorEntity, appointmentTo.appointmentDate()))
                 .thenReturn(List.of(appointmentEntity));
         //then

@@ -88,7 +88,14 @@ class AppointmentControllerTest {
             assertThat(createdAppointment.patientId()).isEqualTo(appointment.patientId());
             List<AppointmentEntity> appointments = appointmentRepo.findAll();
             assertThat(appointments).hasSize(1);
-            //TODO fix lazy initialization for the Patient Appointment List!
+            Optional<PatientEntity> patientEntity = patientRepo.findByIdWithAppointments(savedPatient.getId());
+            assertThat(patientEntity).isPresent();
+            assertThat(patientEntity.get().getAppointmentEntityList()).hasSize(1);
+            assertThat(patientEntity.get().getAppointmentEntityList().get(0))
+                    .isNotNull()
+                    .usingRecursiveComparison()
+                    .ignoringFields("patientEntity")
+                    .isEqualTo(appointments.get(0));
         }
 
         @ParameterizedTest
@@ -387,6 +394,7 @@ class AppointmentControllerTest {
             assertThat(expectedPatient).isPresent();
             assertThat(expectedPatient.get().getAppointmentEntityList()).hasSize(1);
             assertThat(expectedPatient.get().getAppointmentEntityList().get(0))
+                    .isNotNull()
                     .usingRecursiveComparison()
                     .ignoringFields("patientEntity")
                     .isEqualTo(appointments.get(0));
@@ -467,86 +475,122 @@ class AppointmentControllerTest {
             List<AppointmentEntity> appointments = appointmentRepo.findAll();
             assertThat(appointments).isEmpty();
         }
-// TODO: finished here!
-//        @Test
-//        void returnNotFoundWhenCreateAppointmentWithPatientNotFound() {
-//            //given
-//            DoctorEntity doctor = DoctorTestdata.mockDoctorEntity(EMAIL);
-//            doctorRepo.save(doctor);
-//            AppointmentTo appointment = AppointmentTestdata.mockAppointmentTo();
-//            HttpEntity<AppointmentTo> request = createRequestBody(appointment);
-//            //when
-//            ResponseEntity<ErrorResponseUtil> response = restTemplate.postForEntity(CREATE_URL, request, ErrorResponseUtil.class);
-//            //then
-//            ErrorResponseUtil responseBody = response.getBody();
-//            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-//            assertThat(responseBody).isNotNull();
-//            List<AppointmentEntity> appointments = appointmentRepo.findAll();
-//            assertThat(appointments).isEmpty();
-//        }
-//
-//        @Test
-//        void returnNotFoundWhenCreateAppointmentWithDoctorNotFound() {
-//            //given
-//            PatientEntity patient = PatientTestdata.mockPatientEntity(EMAIL);
-//            patientRepo.save(patient);
-//            AppointmentTo appointment = AppointmentTestdata.mockAppointmentTo();
-//            HttpEntity<AppointmentTo> request = createRequestBody(appointment);
-//            //when
-//            ResponseEntity<ErrorResponseUtil> response = restTemplate.postForEntity(CREATE_URL, request, ErrorResponseUtil.class);
-//            //then
-//            ErrorResponseUtil responseBody = response.getBody();
-//            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-//            assertThat(responseBody).isNotNull();
-//            List<AppointmentEntity> appointments = appointmentRepo.findAll();
-//            assertThat(appointments).isEmpty();
-//        }
-//
-//        @Test
-//        void returnForbiddenWhenCreateAppointmentWithBusyPatient() {
-//            //given
-//            PatientEntity patient = PatientTestdata.mockPatientEntity(EMAIL);
-//            PatientEntity savedPatient = patientRepo.save(patient);
-//            DoctorEntity doctor1 = DoctorTestdata.mockDoctorEntity(EMAIL);
-//            DoctorEntity savedDoctor1 = doctorRepo.save(doctor1);
-//            DoctorEntity doctor2 = DoctorTestdata.mockDoctorEntity(EMAIL2);
-//            DoctorEntity savedDoctor2 = doctorRepo.save(doctor2);
-//            AppointmentEntity appointment1 = AppointmentTestdata.mockAppointmentEntity(null, savedDoctor1, savedPatient);
-//            appointmentRepo.save(appointment1);
-//            AppointmentTo appointment = AppointmentTestdata.mockAppointmentTo(null, savedDoctor2.getId(), savedPatient.getId());
-//            HttpEntity<AppointmentTo> request = createRequestBody(appointment);
-//            //when
-//            ResponseEntity<ErrorResponseUtil> response = restTemplate.postForEntity(CREATE_URL, request, ErrorResponseUtil.class);
-//            //then
-//            ErrorResponseUtil responseBody = response.getBody();
-//            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-//            assertThat(responseBody).isNotNull();
-//            List<AppointmentEntity> appointments = appointmentRepo.findAll();
-//            assertThat(appointments).hasSize(1);
-//        }
-//
-//        @Test
-//        void returnForbiddenWhenCreateAppointmentWithBusyDoctor() {
-//            //given
-//            PatientEntity patient1 = PatientTestdata.mockPatientEntity(EMAIL);
-//            PatientEntity savedPatient1 = patientRepo.save(patient1);
-//            PatientEntity patient2 = PatientTestdata.mockPatientEntity(EMAIL2);
-//            PatientEntity savedPatient2 = patientRepo.save(patient2);
-//            DoctorEntity doctor = DoctorTestdata.mockDoctorEntity(EMAIL);
-//            DoctorEntity savedDoctor = doctorRepo.save(doctor);
-//            AppointmentEntity appointment1 = AppointmentTestdata.mockAppointmentEntity(null, savedDoctor, savedPatient1);
-//            appointmentRepo.save(appointment1);
-//            AppointmentTo appointment = AppointmentTestdata.mockAppointmentTo(null, savedDoctor.getId(), savedPatient2.getId());
-//            HttpEntity<AppointmentTo> request = createRequestBody(appointment);
-//            //when
-//            ResponseEntity<ErrorResponseUtil> response = restTemplate.postForEntity(CREATE_URL, request, ErrorResponseUtil.class);
-//            //then
-//            ErrorResponseUtil responseBody = response.getBody();
-//            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-//            assertThat(responseBody).isNotNull();
-//            List<AppointmentEntity> appointments = appointmentRepo.findAll();
-//            assertThat(appointments).hasSize(1);
-//        }
+
+        @Test
+        void returnNotFoundWhenUpdateAppointmentWithPatientNotFound() {
+            //given
+            PatientEntity patient = PatientTestdata.mockPatientEntity(EMAIL);
+            PatientEntity savedPatient = patientRepo.save(patient);
+            DoctorEntity doctor = DoctorTestdata.mockDoctorEntity(EMAIL);
+            DoctorEntity savedDoctor = doctorRepo.save(doctor);
+            AppointmentEntity appointmentEntity = AppointmentTestdata.mockAppointmentEntity(null, savedDoctor, savedPatient);
+            AppointmentEntity savedAppointment = appointmentRepo.save(appointmentEntity);
+            AppointmentTo appointmentTo = AppointmentTestdata.mockAppointmentTo(savedAppointment.getId(), savedDoctor.getId(), Long.MAX_VALUE);
+            HttpEntity<AppointmentTo> request = createRequestBody(appointmentTo);
+            //when
+            ResponseEntity<ErrorResponseUtil> response = restTemplate.exchange(
+                    UPDATE_URL,
+                    HttpMethod.PUT,
+                    request,
+                    ErrorResponseUtil.class
+            );
+            //then
+            ErrorResponseUtil responseBody = response.getBody();
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+            assertThat(responseBody).isNotNull();
+        }
+
+        @Test
+        void returnNotFoundWhenCreateAppointmentWithDoctorNotFound() {
+            //given
+            PatientEntity patient = PatientTestdata.mockPatientEntity(EMAIL);
+            PatientEntity savedPatient = patientRepo.save(patient);
+            DoctorEntity doctor = DoctorTestdata.mockDoctorEntity(EMAIL);
+            DoctorEntity savedDoctor = doctorRepo.save(doctor);
+            AppointmentEntity appointmentEntity = AppointmentTestdata.mockAppointmentEntity(null, savedDoctor, savedPatient);
+            AppointmentEntity savedAppointment = appointmentRepo.save(appointmentEntity);
+            AppointmentTo appointmentTo = AppointmentTestdata.mockAppointmentTo(savedAppointment.getId(), Long.MAX_VALUE, savedPatient.getId());
+            HttpEntity<AppointmentTo> request = createRequestBody(appointmentTo);
+            //when
+            ResponseEntity<ErrorResponseUtil> response = restTemplate.exchange(
+                    UPDATE_URL,
+                    HttpMethod.PUT,
+                    request,
+                    ErrorResponseUtil.class
+            );
+            //then
+            ErrorResponseUtil responseBody = response.getBody();
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+            assertThat(responseBody).isNotNull();
+        }
+
+        @Test
+        void returnForbiddenWhenUpdateAppointmentWithBusyPatient() {
+            //given
+            PatientEntity patient1 = PatientTestdata.mockPatientEntity(EMAIL);
+            PatientEntity savedPatient1 = patientRepo.save(patient1);
+            PatientEntity patient2 = PatientTestdata.mockPatientEntity(EMAIL2);
+            PatientEntity savedPatient2 = patientRepo.save(patient2);
+            DoctorEntity doctor1 = DoctorTestdata.mockDoctorEntity(EMAIL);
+            DoctorEntity savedDoctor1 = doctorRepo.save(doctor1);
+            DoctorEntity doctor2 = DoctorTestdata.mockDoctorEntity(EMAIL2);
+            DoctorEntity savedDoctor2 = doctorRepo.save(doctor2);
+            AppointmentEntity appointmentEntity1 = AppointmentTestdata.mockAppointmentEntity(null, savedDoctor1, savedPatient1);
+            AppointmentEntity savedAppointment1 = appointmentRepo.save(appointmentEntity1);
+            AppointmentEntity appointmentEntity2 = AppointmentTestdata.mockAppointmentEntity(null, savedDoctor2, savedPatient2);
+            appointmentRepo.save(appointmentEntity2);
+            AppointmentTo updateAppointmentTo = AppointmentTestdata.mockAppointmentTo(
+                    savedAppointment1.getId(),
+                    savedDoctor1.getId(),
+                    savedPatient2.getId()
+            );
+            HttpEntity<AppointmentTo> request = createRequestBody(updateAppointmentTo);
+            //when
+            ResponseEntity<ErrorResponseUtil> response = restTemplate.exchange(
+                    UPDATE_URL,
+                    HttpMethod.PUT,
+                    request,
+                    ErrorResponseUtil.class
+            );
+            //then
+            ErrorResponseUtil responseBody = response.getBody();
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+            assertThat(responseBody).isNotNull();
+        }
+
+        @Test
+        void returnForbiddenWhenUpdateAppointmentWithBusyDoctor() {
+            //given
+            PatientEntity patient1 = PatientTestdata.mockPatientEntity(EMAIL);
+            PatientEntity savedPatient1 = patientRepo.save(patient1);
+            PatientEntity patient2 = PatientTestdata.mockPatientEntity(EMAIL2);
+            PatientEntity savedPatient2 = patientRepo.save(patient2);
+            DoctorEntity doctor1 = DoctorTestdata.mockDoctorEntity(EMAIL);
+            DoctorEntity savedDoctor1 = doctorRepo.save(doctor1);
+            DoctorEntity doctor2 = DoctorTestdata.mockDoctorEntity(EMAIL2);
+            DoctorEntity savedDoctor2 = doctorRepo.save(doctor2);
+            AppointmentEntity appointmentEntity1 = AppointmentTestdata.mockAppointmentEntity(null, savedDoctor1, savedPatient1);
+            AppointmentEntity savedAppointment1 = appointmentRepo.save(appointmentEntity1);
+            AppointmentEntity appointmentEntity2 = AppointmentTestdata.mockAppointmentEntity(null, savedDoctor2, savedPatient2);
+            appointmentRepo.save(appointmentEntity2);
+            AppointmentTo updateAppointmentTo = AppointmentTestdata.mockAppointmentTo(
+                    savedAppointment1.getId(),
+                    savedDoctor2.getId(),
+                    savedPatient1.getId()
+            );
+            HttpEntity<AppointmentTo> request = createRequestBody(updateAppointmentTo);
+            //when
+            ResponseEntity<ErrorResponseUtil> response = restTemplate.exchange(
+                    UPDATE_URL,
+                    HttpMethod.PUT,
+                    request,
+                    ErrorResponseUtil.class
+            );
+            //then
+            ErrorResponseUtil responseBody = response.getBody();
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+            assertThat(responseBody).isNotNull();
+        }
     }
 
     @Nested

@@ -28,7 +28,7 @@ public class AppointmentTestdata {
     public static AppointmentEntity mockAppointmentEntity(Long id) {
         return mockAppointmentEntity(id, DoctorTestdata.mockDoctorEntity(ID, EMAIL), PatientTestdata.mockPatientEntity(ID, EMAIL));
     }
-
+    
     public static AppointmentEntity mockAppointmentEntity(Long id, DoctorEntity doctorEntity, PatientEntity patientEntity) {
         AppointmentEntity appointmentEntity = new AppointmentEntity();
         appointmentEntity.setId(id);

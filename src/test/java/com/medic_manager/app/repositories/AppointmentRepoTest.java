@@ -1,6 +1,5 @@
 package com.medic_manager.app.repositories;
 
-import com.medic_manager.app.UnitTestConfig;
 import com.medic_manager.app.entities.AppointmentEntity;
 import com.medic_manager.app.entities.DoctorEntity;
 import com.medic_manager.app.entities.PatientEntity;
@@ -10,16 +9,17 @@ import com.medic_manager.app.testdata.PatientTestdata;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@UnitTestConfig
+@ActiveProfiles("test")
 @DataJpaTest
 class AppointmentRepoTest {
-    
+
     private static final String EMAIL = "email@example.com";
     @Autowired
     private AppointmentRepo appointmentRepo;

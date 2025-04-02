@@ -1,8 +1,6 @@
 package com.medic_manager.app.common;
 
-import com.medic_manager.app.exceptions.AppointmentCreationFailedBusinessException;
-import com.medic_manager.app.exceptions.IncorrectDayOfWeekBusinessException;
-import com.medic_manager.app.exceptions.IncorrectHourOrMinutesBusinessException;
+import com.medic_manager.app.exceptions.*;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -55,6 +53,18 @@ public class ExceptionHandlerControllerUtil {
     @ExceptionHandler(IncorrectHourOrMinutesBusinessException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorResponseUtil incorrectHourOrMinutesBusinessException(IncorrectHourOrMinutesBusinessException exception) {
+        return new ErrorResponseUtil(exception.getCause(), OffsetDateTime.now());
+    }
+
+    @ExceptionHandler(DutyCreationFailedBusinessException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponseUtil dutyCreationFailedBusinessException(DutyCreationFailedBusinessException exception) {
+        return new ErrorResponseUtil(exception.getCause(), OffsetDateTime.now());
+    }
+
+    @ExceptionHandler(InvalidDatesProvidedBusinessException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponseUtil invalidDatesProvidedBusinessException(InvalidDatesProvidedBusinessException exception) {
         return new ErrorResponseUtil(exception.getCause(), OffsetDateTime.now());
     }
 }

@@ -94,7 +94,7 @@ public class DoctorService {
         return persistedDoctor;
     }
 
-    private void checkIfEntityAlreadyExist(String email) throws EntityExistsException {
+    private void checkIfEntityAlreadyExist(String email) {
         Optional<DoctorEntity> doctorByEmail = doctorRepo.findByEmailIgnoreCase(email);
         if (doctorByEmail.isPresent()) {
             logger.severe(() -> getErrorEntityWithPropertyAlreadyExist(DoctorEntity.class, email));
@@ -102,14 +102,14 @@ public class DoctorService {
         }
     }
 
-    private void validateCreateTo(DoctorTo doctorTo) throws IllegalArgumentException {
+    private void validateCreateTo(DoctorTo doctorTo) {
         if (isToInvalid(doctorTo) || doctorTo.id() != null) {
             logger.severe(getErrorNullOrIncorrectTOPassedAsArgumentToMethod());
             throw new IllegalArgumentException(getErrorNullOrIncorrectTOPassedAsArgumentToMethod());
         }
     }
 
-    private void validateUpdateTo(DoctorTo doctorTo) throws IllegalArgumentException {
+    private void validateUpdateTo(DoctorTo doctorTo) {
         if (isToInvalid(doctorTo) || doctorTo.id() == null) {
             logger.severe(getErrorNullOrIncorrectTOPassedAsArgumentToMethod());
             throw new IllegalArgumentException(getErrorNullOrIncorrectTOPassedAsArgumentToMethod());

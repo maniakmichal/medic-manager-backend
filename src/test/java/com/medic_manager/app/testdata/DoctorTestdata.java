@@ -17,6 +17,14 @@ public class DoctorTestdata {
     private static final String IMAGE_URL = "";
     private static final String EMAIL = "email@example.com";
 
+    public static DoctorEntity mockDoctorEntity() {
+        return mockDoctorEntity(null, EMAIL);
+    }
+
+    public static DoctorEntity mockDoctorEntity(Long id) {
+        return mockDoctorEntity(id, EMAIL);
+    }
+
     public static DoctorEntity mockDoctorEntity(String email) {
         return mockDoctorEntity(null, email);
     }

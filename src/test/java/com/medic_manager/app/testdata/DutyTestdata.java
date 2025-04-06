@@ -21,10 +21,14 @@ public class DutyTestdata {
     }
 
     public static DutyEntity mockDutyEntity(Long id, DoctorEntity doctorEntity) {
+        return mockDutyEntity(id, doctorEntity, START_DATE, END_DATE);
+    }
+
+    public static DutyEntity mockDutyEntity(Long id, DoctorEntity doctorEntity, LocalDate startDate, LocalDate endDate) {
         DutyEntity dutyEntity = new DutyEntity();
         dutyEntity.setId(id);
-        dutyEntity.setStartDate(START_DATE);
-        dutyEntity.setEndDate(END_DATE);
+        dutyEntity.setStartDate(startDate);
+        dutyEntity.setEndDate(endDate);
         dutyEntity.setDoctorEntity(doctorEntity);
         return dutyEntity;
     }

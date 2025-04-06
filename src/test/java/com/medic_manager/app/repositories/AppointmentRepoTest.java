@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 class AppointmentRepoTest {
 
-    private static final String EMAIL = "email@example.com";
     @Autowired
     private AppointmentRepo appointmentRepo;
     @Autowired
@@ -31,9 +30,9 @@ class AppointmentRepoTest {
     @Test
     void findAllByPatientEntityAndAppointmentDate() {
         //given
-        DoctorEntity doctorEntity = DoctorTestdata.mockDoctorEntity(EMAIL);
+        DoctorEntity doctorEntity = DoctorTestdata.mockDoctorEntity();
         DoctorEntity savedDoctor = doctorRepo.save(doctorEntity);
-        PatientEntity patientEntity = PatientTestdata.mockPatientEntity(EMAIL);
+        PatientEntity patientEntity = PatientTestdata.mockPatientEntity();
         PatientEntity savedPatient = patientRepo.save(patientEntity);
         AppointmentEntity appointmentEntity = AppointmentTestdata.mockAppointmentEntity(
                 null,
@@ -51,9 +50,9 @@ class AppointmentRepoTest {
     @Test
     void findNoneByPatientEntityAndAppointmentDateWhenNoDateFound() {
         //given
-        DoctorEntity doctorEntity = DoctorTestdata.mockDoctorEntity(EMAIL);
+        DoctorEntity doctorEntity = DoctorTestdata.mockDoctorEntity();
         DoctorEntity savedDoctor = doctorRepo.save(doctorEntity);
-        PatientEntity patientEntity = PatientTestdata.mockPatientEntity(EMAIL);
+        PatientEntity patientEntity = PatientTestdata.mockPatientEntity();
         PatientEntity savedPatient = patientRepo.save(patientEntity);
         AppointmentEntity appointmentEntity = AppointmentTestdata.mockAppointmentEntity(
                 null,
@@ -70,9 +69,9 @@ class AppointmentRepoTest {
     @Test
     void findNoneByPatientEntityAndAppointmentDateWhenNoPatientFound() {
         //given
-        DoctorEntity doctorEntity = DoctorTestdata.mockDoctorEntity(EMAIL);
+        DoctorEntity doctorEntity = DoctorTestdata.mockDoctorEntity();
         DoctorEntity savedDoctor = doctorRepo.save(doctorEntity);
-        PatientEntity patientEntity1 = PatientTestdata.mockPatientEntity(EMAIL);
+        PatientEntity patientEntity1 = PatientTestdata.mockPatientEntity();
         PatientEntity savedPatient1 = patientRepo.save(patientEntity1);
         AppointmentEntity appointmentEntity = AppointmentTestdata.mockAppointmentEntity(
                 null,
@@ -91,9 +90,9 @@ class AppointmentRepoTest {
     @Test
     void findNoneByDoctorEntityAndAppointmentDateWhenNoDateFound() {
         //given
-        DoctorEntity doctorEntity = DoctorTestdata.mockDoctorEntity(EMAIL);
+        DoctorEntity doctorEntity = DoctorTestdata.mockDoctorEntity();
         DoctorEntity savedDoctor = doctorRepo.save(doctorEntity);
-        PatientEntity patientEntity = PatientTestdata.mockPatientEntity(EMAIL);
+        PatientEntity patientEntity = PatientTestdata.mockPatientEntity();
         PatientEntity savedPatient = patientRepo.save(patientEntity);
         AppointmentEntity appointmentEntity = AppointmentTestdata.mockAppointmentEntity(
                 null,
@@ -110,9 +109,9 @@ class AppointmentRepoTest {
     @Test
     void findAllByDoctorEntityAndAppointmentDate() {
         //given
-        DoctorEntity doctorEntity = DoctorTestdata.mockDoctorEntity(EMAIL);
+        DoctorEntity doctorEntity = DoctorTestdata.mockDoctorEntity();
         DoctorEntity savedDoctor = doctorRepo.save(doctorEntity);
-        PatientEntity patientEntity = PatientTestdata.mockPatientEntity(EMAIL);
+        PatientEntity patientEntity = PatientTestdata.mockPatientEntity();
         PatientEntity savedPatient = patientRepo.save(patientEntity);
         AppointmentEntity appointmentEntity = AppointmentTestdata.mockAppointmentEntity(
                 null,
@@ -130,9 +129,9 @@ class AppointmentRepoTest {
     @Test
     void findNoneByDoctorEntityAndAppointmentDateWhenNoDoctorFound() {
         //given
-        DoctorEntity doctorEntity1 = DoctorTestdata.mockDoctorEntity(EMAIL);
+        DoctorEntity doctorEntity1 = DoctorTestdata.mockDoctorEntity();
         DoctorEntity savedDoctor1 = doctorRepo.save(doctorEntity1);
-        PatientEntity patientEntity = PatientTestdata.mockPatientEntity(EMAIL);
+        PatientEntity patientEntity = PatientTestdata.mockPatientEntity();
         PatientEntity savedPatient = patientRepo.save(patientEntity);
         AppointmentEntity appointmentEntity = AppointmentTestdata.mockAppointmentEntity(
                 null,

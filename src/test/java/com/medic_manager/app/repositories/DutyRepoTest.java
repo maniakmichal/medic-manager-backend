@@ -2,9 +2,8 @@ package com.medic_manager.app.repositories;
 
 import com.medic_manager.app.entities.DoctorEntity;
 import com.medic_manager.app.entities.DutyEntity;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -17,7 +16,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles("test")
 @DataJpaTest
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DutyRepoTest {
 
     @Autowired
@@ -27,8 +25,10 @@ class DutyRepoTest {
 
     private DoctorEntity savedDoctor;
 
-    @BeforeAll
+    @BeforeEach
     void setUp() {
+        dutyRepo.deleteAll();
+        doctorRepo.deleteAll();
         LocalDate startDate = LocalDate.of(2021, 7, 10);
         LocalDate endDate = LocalDate.of(2021, 7, 13);
         DoctorEntity doctorEntity = mockDoctorEntity();

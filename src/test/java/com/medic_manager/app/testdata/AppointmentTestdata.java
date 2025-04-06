@@ -19,16 +19,15 @@ public class AppointmentTestdata {
     private static final byte APPOINTMENT_HOUR = 15;
     private static final byte APPOINTMENT_MINUTE = 30;
     private static final Long ID = 1L;
-    private static final String EMAIL = "email@example.com";
 
     public static AppointmentEntity mockAppointmentEntity() {
         return mockAppointmentEntity(null);
     }
 
     public static AppointmentEntity mockAppointmentEntity(Long id) {
-        return mockAppointmentEntity(id, DoctorTestdata.mockDoctorEntity(ID, EMAIL), PatientTestdata.mockPatientEntity(ID, EMAIL));
+        return mockAppointmentEntity(id, DoctorTestdata.mockDoctorEntity(ID), PatientTestdata.mockPatientEntity(ID));
     }
-    
+
     public static AppointmentEntity mockAppointmentEntity(Long id, DoctorEntity doctorEntity, PatientEntity patientEntity) {
         AppointmentEntity appointmentEntity = new AppointmentEntity();
         appointmentEntity.setId(id);

@@ -18,6 +18,14 @@ public class PatientTestdata {
     private static final LocalDate BIRTHDATE = LocalDate.of(2024, 1, 15);
     private static final GenderEnum GENDER_ENUM = GenderEnum.UNKNOWN;
 
+    public static PatientEntity mockPatientEntity() {
+        return mockPatientEntity(null, EMAIL);
+    }
+
+    public static PatientEntity mockPatientEntity(Long id) {
+        return mockPatientEntity(id, EMAIL);
+    }
+
     public static PatientEntity mockPatientEntity(String email) {
         return mockPatientEntity(null, email);
     }

@@ -16,6 +16,11 @@ public class LoggerTextUtil {
     private static final String ERROR_INCORRECT_DAY_OF_WEEK = "ERROR: incorrect day of week: %s passed for booking appointment.";
     private static final String ERROR_INCORRECT_HOUR_OR_MINUTES = "ERROR: incorrect hour: %d or minutes: %d passed for booking appointment.";
     private static final String ERROR_APPOINTMENT_CREATION_FAILED_DUE_TO = "ERROR: appointment creation failed due to: %s";
+    private static final String ERROR_DUTY_CREATION_FAILED_DUE_TO = "ERROR: duty creation failed due to: %s";
+    private static final String ERROR_INVALID_DATES_PROVIDED = "ERROR: duty start date: %s is after end date: %s";
+    private static final String ERROR_DOCTOR_BUSY = "Doctor with ID: %d has got already appointment planned in the same date and time.";
+    private static final String ERROR_PATIENT_BUSY = "Patient with ID: %d has got already appointment planned in the same date and time.";
+    private static final String ERROR_DOCTOR_HAS_DUTY = "Doctor with ID: %d has got already duty planned in the same dates.";
 
     private LoggerTextUtil() {
     }
@@ -70,5 +75,25 @@ public class LoggerTextUtil {
 
     public static String getErrorAppointmentCreationFailedDueTo() {
         return ERROR_APPOINTMENT_CREATION_FAILED_DUE_TO;
+    }
+
+    public static String getErrorDutyCreationFailedDueTo() {
+        return ERROR_DUTY_CREATION_FAILED_DUE_TO;
+    }
+
+    public static String getErrorInvalidDatesProvided() {
+        return ERROR_INVALID_DATES_PROVIDED;
+    }
+
+    public static String getErrorDoctorBusy() {
+        return ERROR_DOCTOR_BUSY;
+    }
+
+    public static String getErrorPatientBusy() {
+        return ERROR_PATIENT_BUSY;
+    }
+
+    public static String getErrorDoctorHasDuty() {
+        return ERROR_DOCTOR_HAS_DUTY;
     }
 }

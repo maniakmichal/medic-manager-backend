@@ -21,7 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 class PatientRepoTest {
 
-    private static final String EMAIL = "email@example.com";
     @Autowired
     private PatientRepo patientRepo;
     @Autowired
@@ -32,7 +31,7 @@ class PatientRepoTest {
     @Test
     void findByEmailIgnoreCase() {
         //given
-        PatientEntity patient = mockPatientEntity(EMAIL);
+        PatientEntity patient = mockPatientEntity();
         PatientEntity savedPatient = patientRepo.save(patient);
         //when
         Optional<PatientEntity> foundPatient = patientRepo.findByEmailIgnoreCase("EmAiL@eXaMpLe.CoM");
@@ -44,7 +43,7 @@ class PatientRepoTest {
     @Test
     void notFindByEmailIgnoreCaseWhenNotExistingEmail() {
         //given
-        PatientEntity patient = mockPatientEntity(EMAIL);
+        PatientEntity patient = mockPatientEntity();
         patientRepo.save(patient);
         //when
         Optional<PatientEntity> foundPatient = patientRepo.findByEmailIgnoreCase("NOT_EXISTING_EMAIL");
@@ -55,7 +54,7 @@ class PatientRepoTest {
     @Test
     void notFindByEmailIgnoreCaseWhenSearchByNotFullLengthEmail() {
         //given
-        PatientEntity patient = mockPatientEntity(EMAIL);
+        PatientEntity patient = mockPatientEntity();
         patientRepo.save(patient);
         //when
         Optional<PatientEntity> foundPatient = patientRepo.findByEmailIgnoreCase("email@example.co");
@@ -66,9 +65,9 @@ class PatientRepoTest {
     @Test
     void findByIdWithAppointments() {
         //given
-        PatientEntity patient = mockPatientEntity(EMAIL);
+        PatientEntity patient = mockPatientEntity();
         PatientEntity savedPatient = patientRepo.save(patient);
-        DoctorEntity doctorEntity = DoctorTestdata.mockDoctorEntity(EMAIL);
+        DoctorEntity doctorEntity = DoctorTestdata.mockDoctorEntity("someEmail@example.com");
         DoctorEntity savedDoctor = doctorRepo.save(doctorEntity);
         AppointmentEntity appointment = AppointmentTestdata.mockAppointmentEntity(null, savedDoctor, savedPatient);
         AppointmentEntity savedAppointment = appointmentRepo.save(appointment);
@@ -88,7 +87,7 @@ class PatientRepoTest {
     @Test
     void findNoneByIdWithAppointmentsWhenIdNotPresent() {
         //given
-        PatientEntity patient = mockPatientEntity(EMAIL);
+        PatientEntity patient = mockPatientEntity();
         patientRepo.save(patient);
         //when
         Optional<PatientEntity> foundPatient = patientRepo.findByIdWithAppointments(Long.MAX_VALUE);

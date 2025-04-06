@@ -15,14 +15,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 class DoctorRepoTest {
 
-    private static final String EMAIL = "email@example.com";
     @Autowired
     private DoctorRepo doctorRepo;
 
     @Test
     void findByEmailIgnoreCase() {
         //given
-        DoctorEntity doctor = mockDoctorEntity(EMAIL);
+        DoctorEntity doctor = mockDoctorEntity();
         DoctorEntity savedDoctor = doctorRepo.save(doctor);
         //when
         Optional<DoctorEntity> foundDoctor = doctorRepo.findByEmailIgnoreCase("EmAiL@eXaMpLe.CoM");
@@ -34,7 +33,7 @@ class DoctorRepoTest {
     @Test
     void notFindByEmailIgnoreCaseWhenNotExistingEmail() {
         //given
-        DoctorEntity doctor = mockDoctorEntity(EMAIL);
+        DoctorEntity doctor = mockDoctorEntity();
         doctorRepo.save(doctor);
         //when
         Optional<DoctorEntity> foundDoctor = doctorRepo.findByEmailIgnoreCase("NOT_EXISTING_EMAIL");
@@ -45,7 +44,7 @@ class DoctorRepoTest {
     @Test
     void notFindByEmailIgnoreCaseWhenSearchByNotFullLengthEmail() {
         //given
-        DoctorEntity doctor = mockDoctorEntity(EMAIL);
+        DoctorEntity doctor = mockDoctorEntity();
         doctorRepo.save(doctor);
         //when
         Optional<DoctorEntity> foundDoctor = doctorRepo.findByEmailIgnoreCase("email@example.co");

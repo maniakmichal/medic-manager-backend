@@ -23,8 +23,6 @@ import static com.medic_manager.app.common.LoggerTextUtil.*;
 @Transactional
 public class AppointmentService {
 
-    private static final String ERROR_DOCTOR_BUSY = "Doctor with ID: %d has got already appointment planned in the same date and time.";
-    private static final String ERROR_PATIENT_BUSY = "Patient with ID: %d has got already appointment planned in the same date and time.";
     private final AppointmentRepo appointmentRepo;
     private final DoctorService doctorService;
     private final PatientService patientService;
@@ -127,14 +125,14 @@ public class AppointmentService {
         return persistedAppointment;
     }
 
-    private void validateCreateTo(AppointmentTo appointmentTo) throws IllegalArgumentException {
+    private void validateCreateTo(AppointmentTo appointmentTo) {
         if (isToInvalid(appointmentTo) || appointmentTo.id() != null) {
             logger.severe(getErrorNullOrIncorrectTOPassedAsArgumentToMethod());
             throw new IllegalArgumentException(getErrorNullOrIncorrectTOPassedAsArgumentToMethod());
         }
     }
 
-    private void validateUpdateTo(AppointmentTo appointmentTo) throws IllegalArgumentException {
+    private void validateUpdateTo(AppointmentTo appointmentTo) {
         if (isToInvalid(appointmentTo) || appointmentTo.id() == null) {
             logger.severe(getErrorNullOrIncorrectTOPassedAsArgumentToMethod());
             throw new IllegalArgumentException(getErrorNullOrIncorrectTOPassedAsArgumentToMethod());
@@ -225,7 +223,7 @@ public class AppointmentService {
                 .filter(appointment -> appointment.getAppointmentMinute() == appointmentTo.appointmentMinute())
                 .toList();
         if (!filteredDoctorAppointments.isEmpty()) {
-            String message = ERROR_DOCTOR_BUSY.formatted(appointmentTo.doctorId());
+            String message = getErrorDoctorBusy().formatted(appointmentTo.doctorId());
             logger.severe(() -> getErrorAppointmentCreationFailedDueTo() + message);
             throw new AppointmentCreationFailedBusinessException(getErrorAppointmentCreationFailedDueTo() + message);
         }
@@ -241,7 +239,7 @@ public class AppointmentService {
                 .filter(appointment -> appointment.getAppointmentMinute() == appointmentTo.appointmentMinute())
                 .toList();
         if (!filteredPatientAppointments.isEmpty()) {
-            String message = ERROR_PATIENT_BUSY.formatted(appointmentTo.patientId());
+            String message = getErrorPatientBusy().formatted(appointmentTo.patientId());
             logger.severe(() -> getErrorAppointmentCreationFailedDueTo() + message);
             throw new AppointmentCreationFailedBusinessException(getErrorAppointmentCreationFailedDueTo() + message);
         }

@@ -19,7 +19,7 @@ public class DutyTestdata {
     public static DutyEntity mockDutyEntity() {
         return mockDutyEntity(null, DoctorTestdata.mockDoctorEntity());
     }
-    
+
     public static DutyEntity mockDutyEntity(Long id, DoctorEntity doctorEntity) {
         DutyEntity dutyEntity = new DutyEntity();
         dutyEntity.setId(id);
@@ -62,6 +62,16 @@ public class DutyTestdata {
                 Arguments.of(new DutyTo(null, null, START_DATE, END_DATE)),
                 Arguments.of(new DutyTo(null, ID, null, END_DATE)),
                 Arguments.of(new DutyTo(null, ID, START_DATE, null))
+        );
+    }
+
+    public static Stream<Arguments> provideInvalidUpdateDutyToList() {
+        return Stream.of(
+                null,
+                Arguments.of(new DutyTo(null, ID, START_DATE, END_DATE)),
+                Arguments.of(new DutyTo(ID, null, START_DATE, END_DATE)),
+                Arguments.of(new DutyTo(ID, ID, null, END_DATE)),
+                Arguments.of(new DutyTo(ID, ID, START_DATE, null))
         );
     }
 }

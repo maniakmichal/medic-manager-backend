@@ -22,6 +22,7 @@ import org.springframework.http.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,6 +36,7 @@ class DutyControllerTest {
     private static final String DELETE_URL = "/com/medic-manager/app/delete-duty/";
     private static final String EMAIL = "email@example.com";
     private static final String EMAIL2 = "email2@example.com";
+    private static final Long ID = 1L;
     @Autowired
     private TestRestTemplate restTemplate;
     @Autowired
@@ -61,7 +63,7 @@ class DutyControllerTest {
         @Test
         void createDuty() {
             //given
-            DoctorEntity doctor = DoctorTestdata.mockDoctorEntity(EMAIL);
+            DoctorEntity doctor = DoctorTestdata.mockDoctorEntity();
             DoctorEntity savedDoctor = doctorRepo.save(doctor);
             DutyTo duty = DutyTestdata.mockDutyTo(null, savedDoctor.getId());
             HttpEntity<DutyTo> request = createRequestBody(duty);
@@ -97,7 +99,7 @@ class DutyControllerTest {
             //given
             LocalDate startDate = LocalDate.of(2024, 5, 11);
             LocalDate endDate = LocalDate.of(2024, 5, 2);
-            DutyTo dutyTo = DutyTestdata.mockDutyTo(null, 1L, startDate, endDate);
+            DutyTo dutyTo = DutyTestdata.mockDutyTo(null, ID, startDate, endDate);
             HttpEntity<DutyTo> request = createRequestBody(dutyTo);
             //when
             ResponseEntity<ErrorResponseUtil> response = restTemplate.postForEntity(CREATE_URL, request, ErrorResponseUtil.class);
@@ -112,7 +114,7 @@ class DutyControllerTest {
         @Test
         void returnNotFoundWhenCreateDutyWithDoctorNotFound() {
             //given
-            DutyTo duty = DutyTestdata.mockDutyTo(null, 1L);
+            DutyTo duty = DutyTestdata.mockDutyTo(null, ID);
             HttpEntity<DutyTo> request = createRequestBody(duty);
             //when
             ResponseEntity<ErrorResponseUtil> response = restTemplate.postForEntity(CREATE_URL, request, ErrorResponseUtil.class);
@@ -127,7 +129,7 @@ class DutyControllerTest {
         @Test
         void returnForbiddenWhenCreateDutyWithBusyDoctor() {
             //given
-            DoctorEntity doctor = DoctorTestdata.mockDoctorEntity(EMAIL);
+            DoctorEntity doctor = DoctorTestdata.mockDoctorEntity();
             DoctorEntity savedDoctor = doctorRepo.save(doctor);
             DutyEntity savedDuty = DutyTestdata.mockDutyEntity(null, savedDoctor);
             dutyRepo.save(savedDuty);
@@ -200,7 +202,7 @@ class DutyControllerTest {
         @Test
         void getDutyById() {
             //given
-            DoctorEntity doctor = DoctorTestdata.mockDoctorEntity(EMAIL);
+            DoctorEntity doctor = DoctorTestdata.mockDoctorEntity();
             DoctorEntity savedDoctor = doctorRepo.save(doctor);
             DutyEntity dutyEntity = DutyTestdata.mockDutyEntity(null, savedDoctor);
             DutyEntity savedDuty = dutyRepo.save(dutyEntity);
@@ -236,391 +238,236 @@ class DutyControllerTest {
         }
     }
 
-//    @Nested
-//    class updatesDuty {
-//        @Test
-//        void updateDuty() {
-//            //given
-//            PatientEntity patient = PatientTestdata.mockPatientEntity(EMAIL);
-//            PatientEntity savedPatient = patientRepo.save(patient);
-//            DoctorEntity doctor = DoctorTestdata.mockDoctorEntity(EMAIL);
-//            DoctorEntity savedDoctor = doctorRepo.save(doctor);
-//            DutyEntity dutyEntity = DutyTestdata.mockDutyEntity(null, savedDoctor, savedPatient);
-//            DutyEntity savedDuty = dutyRepo.save(dutyEntity);
-//            DutyTo updateDutyTo = DutyTestdata.mockDutyTo(
-//                    savedDuty.getId(),
-//                    LocalDate.of(2024, 12, 18),
-//                    DayOfWeek.FRIDAY,
-//                    (byte) 10,
-//                    (byte) 45,
-//                    DutyStatusEnum.IN_PROGRESS,
-//                    savedDoctor.getId(),
-//                    savedPatient.getId()
-//            );
-//            HttpEntity<DutyTo> request = createRequestBody(updateDutyTo);
-//            //when
-//            ResponseEntity<DutyTo> response = restTemplate.exchange(
-//                    UPDATE_URL,
-//                    HttpMethod.PUT,
-//                    request,
-//                    DutyTo.class
-//            );
-//            //then
-//            DutyTo updatedDuty = response.getBody();
-//            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-//            assertThat(updatedDuty).isNotNull();
-//            assertThat(updatedDuty.id()).isEqualTo(savedDuty.getId());
-//            assertThat(updatedDuty.appointmentDayOfWeek()).isEqualTo(updateDutyTo.appointmentDayOfWeek());
-//            assertThat(updatedDuty.appointmentDayOfWeek()).isNotEqualTo(savedAppointment.getDutyDayOfWeek());
-//            assertThat(updatedAppointment.appointmentStatusEnum()).isEqualTo(updateDutyTo.appointmentStatusEnum());
-//            assertThat(updatedDuty.appointmentStatusEnum()).isNotEqualTo(savedDuty.getDutyStatusEnum());
-//            assertThat(updatedDuty.appointmentDate()).isEqualTo(updateDutyTo.appointmentDate());
-//            assertThat(updatedDuty.appointmentDate()).isNotEqualTo(savedDuty.getDutyDate());
-//            assertThat(updatedDuty.appointmentHour()).isEqualTo(updateDutyTo.appointmentHour());
-//            assertThat(updatedDuty.appointmentHour()).isNotEqualTo(savedDuty.getDutyHour());
-//            assertThat(updatedDuty.appointmentMinute()).isEqualTo(updateDutyTo.appointmentMinute());
-//            assertThat(updatedDuty.appointmentMinute()).isNotEqualTo(savedDuty.getDutyMinute());
-//            assertThat(updatedDuty.doctorId()).isEqualTo(savedDoctor.getId());
-//            assertThat(updatedDuty.patientId()).isEqualTo(savedPatient.getId());
-//            List<DutyEntity> duties = dutyRepo.findAll();
-//            assertThat(duties).hasSize(1);
-//        }
-//
-//        @Test
-//        void updateDutyWithNewPatient() {
-//            //given
-//            PatientEntity patient1 = PatientTestdata.mockPatientEntity(EMAIL);
-//            PatientEntity savedPatient1 = patientRepo.save(patient1);
-//            PatientEntity patient2 = PatientTestdata.mockPatientEntity(EMAIL2);
-//            PatientEntity savedPatient2 = patientRepo.save(patient2);
-//            DoctorEntity doctor = DoctorTestdata.mockDoctorEntity(EMAIL);
-//            DoctorEntity savedDoctor = doctorRepo.save(doctor);
-//            DutyEntity dutyEntity = DutyTestdata.mockDutyEntity(null, savedDoctor, savedPatient1);
-//            DutyEntity savedDuty = dutyRepo.save(dutyEntity);
-//            DutyTo updateDutyTo = DutyTestdata.mockDutyTo(
-//                    savedDuty.getId(),
-//                    savedDoctor.getId(),
-//                    savedPatient2.getId()
-//            );
-//            HttpEntity<DutyTo> request = createRequestBody(updateDutyTo);
-//            //when
-//            ResponseEntity<DutyTo> response = restTemplate.exchange(
-//                    UPDATE_URL,
-//                    HttpMethod.PUT,
-//                    request,
-//                    DutyTo.class
-//            );
-//            //then
-//            DutyTo updatedDuty = response.getBody();
-//            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-//            assertThat(updatedDuty).isNotNull();
-//            assertThat(updatedDuty.id()).isEqualTo(savedDuty.getId());
-//            assertThat(updatedDuty.doctorId()).isEqualTo(savedDoctor.getId());
-//            assertThat(updatedDuty.patientId()).isEqualTo(savedPatient2.getId());
-//            assertThat(updatedDuty.patientId()).isNotEqualTo(savedPatient1.getId());
-//            List<DutyEntity> duties = dutyRepo.findAll();
-//            assertThat(duties).hasSize(1);
-//            Optional<PatientEntity> oldPatient = patientRepo.findByIdWithDutys(savedPatient1.getId());
-//            assertThat(oldPatient).isPresent();
-//            assertThat(oldPatient.get().getDutyEntityList()).isEmpty();
-//            Optional<PatientEntity> expectedPatient = patientRepo.findByIdWithDutys(savedPatient2.getId());
-//            assertThat(expectedPatient).isPresent();
-//            assertThat(expectedPatient.get().getDutyEntityList()).hasSize(1);
-//            assertThat(expectedPatient.get().getDutyEntityList().get(0))
-//                    .isNotNull()
-//                    .usingRecursiveComparison()
-//                    .ignoringFields("patientEntity")
-//                    .isEqualTo(duties.get(0));
-//        }
-//
-//        @Test
-//        void updateDutyWithNewDoctor() {
-//            //given
-//            PatientEntity patient = PatientTestdata.mockPatientEntity(EMAIL);
-//            PatientEntity savedPatient = patientRepo.save(patient);
-//            DoctorEntity doctor1 = DoctorTestdata.mockDoctorEntity(EMAIL);
-//            DoctorEntity savedDoctor1 = doctorRepo.save(doctor1);
-//            DoctorEntity doctor2 = DoctorTestdata.mockDoctorEntity(EMAIL2);
-//            DoctorEntity savedDoctor2 = doctorRepo.save(doctor2);
-//            DutyEntity dutyEntity = DutyTestdata.mockDutyEntity(null, savedDoctor1, savedPatient);
-//            DutyEntity savedDuty = dutyRepo.save(dutyEntity);
-//            DutyTo updateDutyTo = DutyTestdata.mockDutyTo(
-//                    savedDuty.getId(),
-//                    savedDoctor2.getId(),
-//                    savedPatient.getId()
-//            );
-//            HttpEntity<DutyTo> request = createRequestBody(updateDutyTo);
-//            //when
-//            ResponseEntity<DutyTo> response = restTemplate.exchange(
-//                    UPDATE_URL,
-//                    HttpMethod.PUT,
-//                    request,
-//                    DutyTo.class
-//            );
-//            //then
-//            DutyTo updatedDuty = response.getBody();
-//            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-//            assertThat(updatedDuty).isNotNull();
-//            assertThat(updatedDuty.id()).isEqualTo(savedDuty.getId());
-//            assertThat(updatedDuty.doctorId()).isEqualTo(savedDoctor2.getId());
-//            assertThat(updatedDuty.doctorId()).isNotEqualTo(savedDoctor1.getId());
-//            assertThat(updatedDuty.patientId()).isEqualTo(savedPatient.getId());
-//            List<DutyEntity> duties = dutyRepo.findAll();
-//            assertThat(duties).hasSize(1);
-//        }
-//
-//        @ParameterizedTest
-//        @MethodSource("com.medic_manager.app.testdata.DutyTestdata#provideInvalidUpdateDutyToList")
-//        void returnBadRequestWhenUpdateDutyWithIncorrectTo(DutyTo dutyTo) {
-//            //given
-//            HttpEntity<DutyTo> request = createRequestBody(dutyTo);
-//            //when
-//            ResponseEntity<ErrorResponseUtil> response = restTemplate.exchange(
-//                    UPDATE_URL,
-//                    HttpMethod.PUT,
-//                    request,
-//                    ErrorResponseUtil.class
-//            );
-//            //then
-//            ErrorResponseUtil responseBody = response.getBody();
-//            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-//            assertThat(responseBody).isNotNull();
-//            List<DutyEntity> duties = dutyRepo.findAll();
-//            assertThat(duties).isEmpty();
-//        }
-//
-//        @ParameterizedTest
-//        @MethodSource("com.medic_manager.app.testdata.DutyTestdata#provideInvalidBusinessDataForUpdate")
-//        void returnForbiddenWhenUpdateDutyWithIncorrectBusinessData(DutyTo dutyTo) {
-//            //given
-//            HttpEntity<DutyTo> request = createRequestBody(dutyTo);
-//            //when
-//            ResponseEntity<ErrorResponseUtil> response = restTemplate.exchange(
-//                    UPDATE_URL,
-//                    HttpMethod.PUT,
-//                    request,
-//                    ErrorResponseUtil.class
-//            );
-//            //then
-//            ErrorResponseUtil responseBody = response.getBody();
-//            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-//            assertThat(responseBody).isNotNull();
-//            List<DutyEntity> duties = dutyRepo.findAll();
-//            assertThat(duties).isEmpty();
-//        }
-//
-//        @Test
-//        void returnNotFoundWhenUpdateDutyWithPatientNotFound() {
-//            //given
-//            PatientEntity patient = PatientTestdata.mockPatientEntity(EMAIL);
-//            PatientEntity savedPatient = patientRepo.save(patient);
-//            DoctorEntity doctor = DoctorTestdata.mockDoctorEntity(EMAIL);
-//            DoctorEntity savedDoctor = doctorRepo.save(doctor);
-//            DutyEntity dutyEntity = DutyTestdata.mockDutyEntity(null, savedDoctor, savedPatient);
-//            DutyEntity savedDuty = dutyRepo.save(dutyEntity);
-//            DutyTo dutyTo = DutyTestdata.mockDutyTo(savedDuty.getId(), savedDoctor.getId(), Long.MAX_VALUE);
-//            HttpEntity<DutyTo> request = createRequestBody(dutyTo);
-//            //when
-//            ResponseEntity<ErrorResponseUtil> response = restTemplate.exchange(
-//                    UPDATE_URL,
-//                    HttpMethod.PUT,
-//                    request,
-//                    ErrorResponseUtil.class
-//            );
-//            //then
-//            ErrorResponseUtil responseBody = response.getBody();
-//            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-//            assertThat(responseBody).isNotNull();
-//        }
-//
-//        @Test
-//        void returnNotFoundWhenCreateDutyWithDoctorNotFound() {
-//            //given
-//            PatientEntity patient = PatientTestdata.mockPatientEntity(EMAIL);
-//            PatientEntity savedPatient = patientRepo.save(patient);
-//            DoctorEntity doctor = DoctorTestdata.mockDoctorEntity(EMAIL);
-//            DoctorEntity savedDoctor = doctorRepo.save(doctor);
-//            DutyEntity dutyEntity = DutyTestdata.mockDutyEntity(null, savedDoctor, savedPatient);
-//            DutyEntity savedDuty = dutyRepo.save(dutyEntity);
-//            DutyTo dutyTo = DutyTestdata.mockDutyTo(savedDuty.getId(), Long.MAX_VALUE, savedPatient.getId());
-//            HttpEntity<DutyTo> request = createRequestBody(dutyTo);
-//            //when
-//            ResponseEntity<ErrorResponseUtil> response = restTemplate.exchange(
-//                    UPDATE_URL,
-//                    HttpMethod.PUT,
-//                    request,
-//                    ErrorResponseUtil.class
-//            );
-//            //then
-//            ErrorResponseUtil responseBody = response.getBody();
-//            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-//            assertThat(responseBody).isNotNull();
-//        }
-//
-//        @Test
-//        void returnForbiddenWhenUpdateDutyWithBusyPatient() {
-//            //given
-//            PatientEntity patient1 = PatientTestdata.mockPatientEntity(EMAIL);
-//            PatientEntity savedPatient1 = patientRepo.save(patient1);
-//            PatientEntity patient2 = PatientTestdata.mockPatientEntity(EMAIL2);
-//            PatientEntity savedPatient2 = patientRepo.save(patient2);
-//            DoctorEntity doctor1 = DoctorTestdata.mockDoctorEntity(EMAIL);
-//            DoctorEntity savedDoctor1 = doctorRepo.save(doctor1);
-//            DoctorEntity doctor2 = DoctorTestdata.mockDoctorEntity(EMAIL2);
-//            DoctorEntity savedDoctor2 = doctorRepo.save(doctor2);
-//            DutyEntity dutyEntity1 = DutyTestdata.mockDutyEntity(null, savedDoctor1, savedPatient1);
-//            DutyEntity savedDuty1 = dutyRepo.save(dutyEntity1);
-//            DutyEntity dutyEntity2 = DutyTestdata.mockDutyEntity(null, savedDoctor2, savedPatient2);
-//            dutyRepo.save(dutyEntity2);
-//            DutyTo updateDutyTo = DutyTestdata.mockDutyTo(
-//                    savedDuty1.getId(),
-//                    savedDoctor1.getId(),
-//                    savedPatient2.getId()
-//            );
-//            HttpEntity<DutyTo> request = createRequestBody(updateDutyTo);
-//            //when
-//            ResponseEntity<ErrorResponseUtil> response = restTemplate.exchange(
-//                    UPDATE_URL,
-//                    HttpMethod.PUT,
-//                    request,
-//                    ErrorResponseUtil.class
-//            );
-//            //then
-//            ErrorResponseUtil responseBody = response.getBody();
-//            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-//            assertThat(responseBody).isNotNull();
-//        }
-//
-//        @Test
-//        void returnForbiddenWhenUpdateDutyWithBusyDoctor() {
-//            //given
-//            PatientEntity patient1 = PatientTestdata.mockPatientEntity(EMAIL);
-//            PatientEntity savedPatient1 = patientRepo.save(patient1);
-//            PatientEntity patient2 = PatientTestdata.mockPatientEntity(EMAIL2);
-//            PatientEntity savedPatient2 = patientRepo.save(patient2);
-//            DoctorEntity doctor1 = DoctorTestdata.mockDoctorEntity(EMAIL);
-//            DoctorEntity savedDoctor1 = doctorRepo.save(doctor1);
-//            DoctorEntity doctor2 = DoctorTestdata.mockDoctorEntity(EMAIL2);
-//            DoctorEntity savedDoctor2 = doctorRepo.save(doctor2);
-//            DutyEntity dutyEntity1 = DutyTestdata.mockDutyEntity(null, savedDoctor1, savedPatient1);
-//            DutyEntity savedDuty1 = dutyRepo.save(dutyEntity1);
-//            DutyEntity dutyEntity2 = DutyTestdata.mockDutyEntity(null, savedDoctor2, savedPatient2);
-//            dutyRepo.save(dutyEntity2);
-//            DutyTo updateDutyTo = DutyTestdata.mockDutyTo(
-//                    savedDuty1.getId(),
-//                    savedDoctor2.getId(),
-//                    savedPatient1.getId()
-//            );
-//            HttpEntity<DutyTo> request = createRequestBody(updateDutyTo);
-//            //when
-//            ResponseEntity<ErrorResponseUtil> response = restTemplate.exchange(
-//                    UPDATE_URL,
-//                    HttpMethod.PUT,
-//                    request,
-//                    ErrorResponseUtil.class
-//            );
-//            //then
-//            ErrorResponseUtil responseBody = response.getBody();
-//            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-//            assertThat(responseBody).isNotNull();
-//        }
-//    }
-//
-//    @Nested
-//    class deletesDuty {
-//        @Test
-//        void deleteDuty() {
-//            //given
-//            PatientEntity patient = PatientTestdata.mockPatientEntity(EMAIL);
-//            PatientEntity savedPatient = patientRepo.save(patient);
-//            DoctorEntity doctor = DoctorTestdata.mockDoctorEntity(EMAIL);
-//            DoctorEntity savedDoctor = doctorRepo.save(doctor);
-//            DutyEntity dutyEntity = DutyTestdata.mockDutyEntity(null, savedDoctor, savedPatient);
-//            DutyEntity savedDuty = dutyRepo.save(dutyEntity);
-//            //when
-//            ResponseEntity<Void> response = restTemplate.exchange(
-//                    DELETE_URL + savedDuty.getId(),
-//                    HttpMethod.DELETE,
-//                    null,
-//                    Void.class
-//            );
-//            //then
-//            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-//            Optional<DutyEntity> deletedDuty = dutyRepo.findById(savedDuty.getId());
-//            assertThat(deletedDuty).isNotPresent();
-//            List<DutyEntity> allDutys = dutyRepo.findAll();
-//            assertThat(allDutys).isEmpty();
-//        }
-//
-//        @Test
-//        void returnBadRequestWhenDeleteDutyByNullId() {
-//            //given
-//            //when
-//            ResponseEntity<ErrorResponseUtil> response = restTemplate.exchange(
-//                    DELETE_URL + null,
-//                    HttpMethod.DELETE,
-//                    null,
-//                    ErrorResponseUtil.class
-//            );
-//            //then
-//            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-//        }
-//
-//        @Test
-//        void returnNoContentWhenDeleteDutyByNotExistingId() {
-//            //given
-//            PatientEntity patient = PatientTestdata.mockPatientEntity(EMAIL);
-//            PatientEntity savedPatient = patientRepo.save(patient);
-//            DoctorEntity doctor = DoctorTestdata.mockDoctorEntity(EMAIL);
-//            DoctorEntity savedDoctor = doctorRepo.save(doctor);
-//            DutyEntity dutyEntity = DutyTestdata.mockDutyEntity(null, savedDoctor, savedPatient);
-//            DutyEntity savedDuty = dutyRepo.save(dutyEntity);
-//            //when
-//            ResponseEntity<Void> response = restTemplate.exchange(
-//                    DELETE_URL + Long.MAX_VALUE,
-//                    HttpMethod.DELETE,
-//                    null,
-//                    Void.class
-//            );
-//            //then
-//            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-//            Optional<DutyEntity> notDeletedDuty = dutyRepo.findById(savedDuty.getId());
-//            assertThat(notDeletedDuty).isPresent();
-//            List<DutyEntity> allDutys = dutyRepo.findAll();
-//            assertThat(allDutys).hasSize(1);
-//        }
-//    }
-//
-//    @Nested
-//    class patientAndDutyCascadeTest {
-//        @Test
-//        void deleteDutyByCascadeWhenDeletePatient() {
-//            //given
-//            PatientEntity patient = PatientTestdata.mockPatientEntity(EMAIL);
-//            PatientEntity savedPatient = patientRepo.save(patient);
-//            DoctorEntity doctor = DoctorTestdata.mockDoctorEntity(EMAIL);
-//            DoctorEntity savedDoctor = doctorRepo.save(doctor);
-//            DutyEntity dutyEntity = DutyTestdata.mockDutyEntity(null, savedDoctor, savedPatient);
-//            DutyEntity savedDuty = dutyRepo.save(dutyEntity);
-//            //then
-//            assertThat(savedDuty).isNotNull();
-//            Optional<PatientEntity> patientEntity = patientRepo.findByIdWithDutys(savedPatient.getId());
-//            assertThat(patientEntity).isPresent();
-//            assertThat(patientEntity.get().getDutyEntityList()).hasSize(1);
-//            assertThat(patientEntity.get().getDutyEntityList().get(0))
-//                    .isNotNull()
-//                    .usingRecursiveComparison()
-//                    .ignoringFields("patientEntity", "doctorEntity", "createdAt", "modifiedAt")
-//                    .isEqualTo(savedDuty);
-//            //when
-//            patientRepo.deleteById(savedPatient.getId());
-//            //then
-//            List<PatientEntity> patients = patientRepo.findAll();
-//            assertThat(patients).isEmpty();
-//            List<DutyEntity> duties = dutyRepo.findAll();
-//            assertThat(duties).isEmpty();
-//            List<DoctorEntity> doctors = doctorRepo.findAll();
-//            assertThat(doctors).hasSize(1);
-//        }
-//    }
+    @Nested
+    class updatesDuty {
+        @Test
+        void updateDuty() {
+            //given
+            DoctorEntity doctor = DoctorTestdata.mockDoctorEntity();
+            DoctorEntity savedDoctor = doctorRepo.save(doctor);
+            DutyEntity dutyEntity = DutyTestdata.mockDutyEntity(null, savedDoctor);
+            DutyEntity savedDuty = dutyRepo.save(dutyEntity);
+            LocalDate updatedStartDate = LocalDate.of(2022, 8, 19);
+            LocalDate updatedEndDate = LocalDate.of(2022, 8, 29);
+            DutyTo updateDutyTo = DutyTestdata.mockDutyTo(
+                    savedDuty.getId(),
+                    savedDoctor.getId(),
+                    updatedStartDate,
+                    updatedEndDate
+            );
+            HttpEntity<DutyTo> request = createRequestBody(updateDutyTo);
+            //when
+            ResponseEntity<DutyTo> response = restTemplate.exchange(
+                    UPDATE_URL,
+                    HttpMethod.PUT,
+                    request,
+                    DutyTo.class
+            );
+            //then
+            DutyTo updatedDuty = response.getBody();
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(updatedDuty).isNotNull();
+            assertThat(updatedDuty.id()).isEqualTo(savedDuty.getId());
+            assertThat(updatedDuty.doctorId()).isEqualTo(savedDoctor.getId());
+            assertThat(updatedDuty.startDate()).isNotEqualTo(savedDuty.getStartDate());
+            assertThat(updatedDuty.startDate()).isEqualTo(updatedStartDate);
+            assertThat(updatedDuty.endDate()).isNotEqualTo(savedDuty.getEndDate());
+            assertThat(updatedDuty.endDate()).isEqualTo(updatedEndDate);
+            List<DutyEntity> duties = dutyRepo.findAll();
+            assertThat(duties).hasSize(1);
+        }
+
+        @Test
+        void updateDutyWithNewDoctor() {
+            //given
+            DoctorEntity doctor1 = DoctorTestdata.mockDoctorEntity(EMAIL);
+            DoctorEntity savedDoctor1 = doctorRepo.save(doctor1);
+            DoctorEntity doctor2 = DoctorTestdata.mockDoctorEntity(EMAIL2);
+            DoctorEntity savedDoctor2 = doctorRepo.save(doctor2);
+            DutyEntity dutyEntity = DutyTestdata.mockDutyEntity(null, savedDoctor1);
+            DutyEntity savedDuty = dutyRepo.save(dutyEntity);
+            DutyTo updateDutyTo = DutyTestdata.mockDutyTo(
+                    savedDuty.getId(),
+                    savedDoctor2.getId()
+            );
+            HttpEntity<DutyTo> request = createRequestBody(updateDutyTo);
+            //when
+            ResponseEntity<DutyTo> response = restTemplate.exchange(
+                    UPDATE_URL,
+                    HttpMethod.PUT,
+                    request,
+                    DutyTo.class
+            );
+            //then
+            DutyTo updatedDuty = response.getBody();
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(updatedDuty).isNotNull();
+            assertThat(updatedDuty.id()).isEqualTo(savedDuty.getId());
+            assertThat(updatedDuty.doctorId()).isEqualTo(savedDoctor2.getId());
+            assertThat(updatedDuty.doctorId()).isNotEqualTo(savedDoctor1.getId());
+            List<DutyEntity> duties = dutyRepo.findAll();
+            assertThat(duties).hasSize(1);
+        }
+
+        @ParameterizedTest
+        @MethodSource("com.medic_manager.app.testdata.DutyTestdata#provideInvalidUpdateDutyToList")
+        void returnBadRequestWhenUpdateDutyWithIncorrectTo(DutyTo dutyTo) {
+            //given
+            HttpEntity<DutyTo> request = createRequestBody(dutyTo);
+            //when
+            ResponseEntity<ErrorResponseUtil> response = restTemplate.exchange(
+                    UPDATE_URL,
+                    HttpMethod.PUT,
+                    request,
+                    ErrorResponseUtil.class
+            );
+            //then
+            ErrorResponseUtil responseBody = response.getBody();
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+            assertThat(responseBody).isNotNull();
+            List<DutyEntity> duties = dutyRepo.findAll();
+            assertThat(duties).isEmpty();
+        }
+
+        @Test
+        void returnForbiddenWhenUpdateDutyWithIncorrectDates() {
+            //given
+            DoctorEntity doctor = DoctorTestdata.mockDoctorEntity();
+            DoctorEntity savedDoctor = doctorRepo.save(doctor);
+            DutyEntity dutyEntity = DutyTestdata.mockDutyEntity(null, savedDoctor);
+            DutyEntity savedDuty = dutyRepo.save(dutyEntity);
+            LocalDate updatedStartDate = LocalDate.of(2022, 8, 29);
+            LocalDate updatedEndDate = LocalDate.of(2022, 8, 19);
+            DutyTo updateDutyTo = DutyTestdata.mockDutyTo(
+                    savedDuty.getId(),
+                    savedDoctor.getId(),
+                    updatedStartDate,
+                    updatedEndDate
+            );
+            HttpEntity<DutyTo> request = createRequestBody(updateDutyTo);
+            //when
+            ResponseEntity<ErrorResponseUtil> response = restTemplate.exchange(
+                    UPDATE_URL,
+                    HttpMethod.PUT,
+                    request,
+                    ErrorResponseUtil.class
+            );
+            //then
+            ErrorResponseUtil responseBody = response.getBody();
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+            assertThat(responseBody).isNotNull();
+        }
+
+        @Test
+        void returnNotFoundWhenUpdateDutyWithDoctorNotFound() {
+            //given
+            DoctorEntity doctor = DoctorTestdata.mockDoctorEntity();
+            DoctorEntity savedDoctor = doctorRepo.save(doctor);
+            DutyEntity dutyEntity = DutyTestdata.mockDutyEntity(null, savedDoctor);
+            DutyEntity savedDuty = dutyRepo.save(dutyEntity);
+            DutyTo dutyTo = DutyTestdata.mockDutyTo(savedDuty.getId(), Long.MAX_VALUE);
+            HttpEntity<DutyTo> request = createRequestBody(dutyTo);
+            //when
+            ResponseEntity<ErrorResponseUtil> response = restTemplate.exchange(
+                    UPDATE_URL,
+                    HttpMethod.PUT,
+                    request,
+                    ErrorResponseUtil.class
+            );
+            //then
+            ErrorResponseUtil responseBody = response.getBody();
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+            assertThat(responseBody).isNotNull();
+        }
+
+        @Test
+        void returnForbiddenWhenUpdateDutyWithBusyDoctor() {
+            //given
+            DoctorEntity doctor1 = DoctorTestdata.mockDoctorEntity(EMAIL);
+            DoctorEntity savedDoctor1 = doctorRepo.save(doctor1);
+            DoctorEntity doctor2 = DoctorTestdata.mockDoctorEntity(EMAIL2);
+            DoctorEntity savedDoctor2 = doctorRepo.save(doctor2);
+            DutyEntity dutyEntity1 = DutyTestdata.mockDutyEntity(null, savedDoctor1);
+            DutyEntity savedDuty1 = dutyRepo.save(dutyEntity1);
+            DutyEntity dutyEntity2 = DutyTestdata.mockDutyEntity(null, savedDoctor2);
+            dutyRepo.save(dutyEntity2);
+            DutyTo updateDutyTo = DutyTestdata.mockDutyTo(
+                    savedDuty1.getId(),
+                    savedDoctor2.getId()
+            );
+            HttpEntity<DutyTo> request = createRequestBody(updateDutyTo);
+            //when
+            ResponseEntity<ErrorResponseUtil> response = restTemplate.exchange(
+                    UPDATE_URL,
+                    HttpMethod.PUT,
+                    request,
+                    ErrorResponseUtil.class
+            );
+            //then
+            ErrorResponseUtil responseBody = response.getBody();
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+            assertThat(responseBody).isNotNull();
+        }
+    }
+
+    @Nested
+    class deletesDuty {
+        @Test
+        void deleteDuty() {
+            //given
+            DoctorEntity doctor = DoctorTestdata.mockDoctorEntity();
+            DoctorEntity savedDoctor = doctorRepo.save(doctor);
+            DutyEntity dutyEntity = DutyTestdata.mockDutyEntity(null, savedDoctor);
+            DutyEntity savedDuty = dutyRepo.save(dutyEntity);
+            //when
+            ResponseEntity<Void> response = restTemplate.exchange(
+                    DELETE_URL + savedDuty.getId(),
+                    HttpMethod.DELETE,
+                    null,
+                    Void.class
+            );
+            //then
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+            Optional<DutyEntity> deletedDuty = dutyRepo.findById(savedDuty.getId());
+            assertThat(deletedDuty).isNotPresent();
+            List<DutyEntity> allDuties = dutyRepo.findAll();
+            assertThat(allDuties).isEmpty();
+        }
+
+        @Test
+        void returnBadRequestWhenDeleteDutyByNullId() {
+            //given
+            //when
+            ResponseEntity<ErrorResponseUtil> response = restTemplate.exchange(
+                    DELETE_URL + null,
+                    HttpMethod.DELETE,
+                    null,
+                    ErrorResponseUtil.class
+            );
+            //then
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        }
+
+        @Test
+        void returnNoContentWhenDeleteDutyByNotExistingId() {
+            //given
+            DoctorEntity doctor = DoctorTestdata.mockDoctorEntity(EMAIL);
+            DoctorEntity savedDoctor = doctorRepo.save(doctor);
+            DutyEntity dutyEntity = DutyTestdata.mockDutyEntity(null, savedDoctor);
+            DutyEntity savedDuty = dutyRepo.save(dutyEntity);
+            //when
+            ResponseEntity<Void> response = restTemplate.exchange(
+                    DELETE_URL + Long.MAX_VALUE,
+                    HttpMethod.DELETE,
+                    null,
+                    Void.class
+            );
+            //then
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+            Optional<DutyEntity> notDeletedDuty = dutyRepo.findById(savedDuty.getId());
+            assertThat(notDeletedDuty).isPresent();
+            List<DutyEntity> allDuties = dutyRepo.findAll();
+            assertThat(allDuties).hasSize(1);
+        }
+    }
 }

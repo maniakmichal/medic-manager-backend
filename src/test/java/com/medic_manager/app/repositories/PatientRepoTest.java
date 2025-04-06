@@ -67,7 +67,7 @@ class PatientRepoTest {
         //given
         PatientEntity patient = mockPatientEntity();
         PatientEntity savedPatient = patientRepo.save(patient);
-        DoctorEntity doctorEntity = DoctorTestdata.mockDoctorEntity();
+        DoctorEntity doctorEntity = DoctorTestdata.mockDoctorEntity("someEmail@example.com");
         DoctorEntity savedDoctor = doctorRepo.save(doctorEntity);
         AppointmentEntity appointment = AppointmentTestdata.mockAppointmentEntity(null, savedDoctor, savedPatient);
         AppointmentEntity savedAppointment = appointmentRepo.save(appointment);
